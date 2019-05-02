@@ -3,23 +3,29 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using DataSet;
-using Mapbox.Unity.Map.Interfaces;
+using Mapbox.Unity.Map;
+using Mapbox.Unity.Utilities;
 using Mapbox.Utils;
 
 public class DataHandler : MonoBehaviour
 {
     private DataSet.DataSet mapData;
-    private IMap map;
+    private AbstractMap map;
+
     // Start is called before the first frame update
     void Start()
     {
-        map = GetComponent<IMap>();
+        map = GetComponent<AbstractMap>();
         map.OnInitialized += LoadDataset;
 
         // Load data from  JSOIN
         var jsonTextFile = Resources.Load<TextAsset>("out");
         if(jsonTextFile) {
             mapData = LoadMapData(jsonTextFile);
+            Debug.Log("Données chargées");
+
+            var locOpt = map.Options.locationOptions;
+            map.Initialize(Conversions.StringToLatLon(locOpt.latitudeLongitude),(int) locOpt.zoom);
         }
         else 
            Debug.LogError("Le fichier JSON est introuvable !");
@@ -37,5 +43,6 @@ public class DataHandler : MonoBehaviour
             cylinder.transform.localScale /= 15;
             cylinder.transform.position = point;
         }
+        Debug.Log("Données affichées");
     }
 }
