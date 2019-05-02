@@ -4,127 +4,127 @@
         "fields": [
             {
                 "id": "essencefrancais",
-                "displayName": "essencefrancais",
+                "displayName": "Essence FR",
                 "type": "string"
             },
             {
                 "id": "circonference_cm",
-                "displayName": "circonference_cm",
+                "displayName": "Circonference (cm)",
                 "type": "number"
             },
             {
                 "id": "hauteurtotale_m",
-                "displayName": "hauteurtotale_m",
+                "displayName": "Hauteur totale (m)",
                 "type": "number"
             },
             {
                 "id": "hauteurfut_m",
-                "displayName": "hauteurfut_m",
+                "displayName": "Hauteur de fut (m)",
                 "type": "number"
             },
             {
                 "id": "diametrecouronne_m",
-                "displayName": "diametrecouronne_m",
+                "displayName": "Diamètre couronne (m)",
                 "type": "number"
             },
             {
                 "id": "rayoncouronne_m",
-                "displayName": "rayoncouronne_m",
+                "displayName": "Rayon couronne (m)",
                 "type": "number"
             },
             {
                 "id": "dateplantation",
-                "displayName": "dateplantation",
+                "displayName": "Date plantation",
                 "type": "string"
             },
             {
                 "id": "genre",
-                "displayName": "genre",
+                "displayName": "Genre",
                 "type": "string"
             },
             {
                 "id": "espece",
-                "displayName": "espece",
+                "displayName": "Espèce",
                 "type": "string"
             },
             {
                 "id": "variete",
-                "displayName": "variete",
+                "displayName": "Variété",
                 "type": "string"
             },
             {
                 "id": "essence",
-                "displayName": "essence",
+                "displayName": "Essence",
                 "type": "string"
             },
             {
                 "id": "architecture",
-                "displayName": "architecture",
+                "displayName": "Architecture",
                 "type": "string"
             },
             {
                 "id": "localisation",
-                "displayName": "localisation",
+                "displayName": "Localisation",
                 "type": "string"
             },
             {
                 "id": "naturerevetement",
-                "displayName": "naturerevetement",
+                "displayName": "Nature revêtement",
                 "type": "string"
             },
             {
                 "id": "mobilierurbain",
-                "displayName": "mobilierurbain",
+                "displayName": "Mobilier urbain",
                 "type": "string"
             },
             {
                 "id": "anneeplantation",
-                "displayName": "anneeplantation",
+                "displayName": "Année plantation",
                 "type": "number"
             },
             {
                 "id": "commune",
-                "displayName": "commune",
+                "displayName": "Commune",
                 "type": "string"
             },
             {
                 "id": "codeinsee",
-                "displayName": "codeinsee",
+                "displayName": "Code INSEE",
                 "type": "number"
             },
             {
                 "id": "nomvoie",
-                "displayName": "nomvoie",
+                "displayName": "Nom voie",
                 "type": "string"
             },
             {
                 "id": "codefuv",
-                "displayName": "codefuv",
+                "displayName": "Code FUV",
                 "type": "number"
             },
             {
                 "id": "identifiant",
-                "displayName": "identifiant",
+                "displayName": "Identifiant",
                 "type": "number"
             },
             {
                 "id": "numero",
-                "displayName": "numero",
+                "displayName": "Numero",
                 "type": "number"
             },
             {
                 "id": "codegenre",
-                "displayName": "codegenre",
+                "displayName": "Code genre",
                 "type": "number"
             },
             {
                 "id": "gid",
-                "displayName": "gid",
+                "displayName": "Global ID",
                 "type": "number"
             },
             {
                 "id": "surfacecadre_m2",
-                "displayName": "surfacecadre_m2",
+                "displayName": "Surface cadre (m²)",
                 "type": "number"
             }
         ],

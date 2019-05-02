@@ -46,6 +46,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pointsScale: 15
+  maxHeight: 2
+  PointPrefab: {fileID: 843694123224651982, guid: ae4179fa3398ccc4893aef8a80910a4d,
+    type: 3}
+  PointInfoPrefab: {fileID: 0}
+  PointInfoText: {fileID: 4956499644779794325, guid: bec1ac7f9945be84db0ad406884368bf,
+    type: 3}
+  PanelTransform: {fileID: 0}
 --- !u!114 &1150423601020279900
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -85,7 +92,7 @@ MonoBehaviour:
       scalingType: 1
       unityTileSize: 1
     loadingTexture: {fileID: 2800000, guid: e2896a92727704803a9c422b043eae89, type: 3}
-    tileMaterial: {fileID: 2100000, guid: b9f23e9bce724fa4daac57ecded470b8, type: 2}
+    tileMaterial: {fileID: 0}
   _initializeOnStart: 0
   _imagery:
     _layerProperty:

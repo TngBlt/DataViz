@@ -10,25 +10,17 @@ public class HandController : MonoBehaviour
     public XRNode handNode;
     public GameObject map;
     private IMap imap;
-    GameObject text;
-    TextMesh textMesh;
-    MeshRenderer meshRenderer;
-
+    private DataHandler dataHandler;
     LineRenderer lineRenderer;
-
     private InputDevice device;
+    private bool isOverBar;
 
     // Start is called before the first frame update
     void Start()
     {
         imap = map.GetComponent<IMap>();
+        dataHandler = map.GetComponent<DataHandler>();
         lineRenderer = gameObject.GetComponent<LineRenderer>();
-
-        // Text
-        text = new GameObject();
-        textMesh = text.AddComponent<TextMesh>();
-        meshRenderer = text.AddComponent<MeshRenderer>();
-
         //get device
         device = InputDevices.GetDeviceAtXRNode(handNode);
     }
@@ -47,29 +39,26 @@ public class HandController : MonoBehaviour
         RaycastHit hit;
 
         if(Physics.Raycast(transform.position,transform.TransformDirection(Vector3.forward), out hit, 1000)) {
+            if(hit.collider.GetComponentInParent<MapDataPoint>() != null) {
+                isOverBar = true;
+                dataHandler.ShowInfo(hit.collider.GetComponentInParent<MapDataPoint>());
+            }
+            else {
+                isOverBar = false;
+                dataHandler.HideInfo();
+            }
             lineRenderer.SetPosition(1,hit.point);
-            addTextNextToHand(hit.point);
         }
             
         else {
-           lineRenderer.SetPosition(1,transform.TransformDirection(Vector3.forward) * 1000);
+            lineRenderer.SetPosition(1,transform.TransformDirection(Vector3.forward) * 1000);
         }
 
         // check trigger press
-        bool triggerValue;
-        if(device.TryGetFeatureValue(CommonUsages.triggerButton, out triggerValue) && triggerValue) {
-            if(hit.collider.gameObject)
-            zoom(hit.point);
-        }
-    }
-
-    private void addTextNextToHand(Vector3 hitOnMap) {
-        var geoLoc = imap.WorldToGeoPosition(hitOnMap);
-        text.transform.position = this.transform.position + Vector3.left;
-        textMesh.text = geoLoc.ToString();
-    }
-
-    private void zoom(Vector3 point) {
-
+        //bool triggerValue;
+        // if(device.TryGetFeatureValue(CommonUsages.triggerButton, out triggerValue) && triggerValue) {
+        //     if(hit.collider.gameObject)
+        //     zoom(hit.point);
+        // }
     }
 }

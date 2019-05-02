@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using System.IO;
 using System.Linq;
 using DataSet;
@@ -17,6 +18,9 @@ public class DataHandler : MonoBehaviour
     public float pointsScale = 0.06f;
     public float maxHeight = 2.0f;
     public GameObject PointPrefab;
+    public GameObject PointInfoPrefab;
+    public GameObject PointInfoText;
+    public Transform PanelTransform;
 
     // Start is called before the first frame update
     void Start()
@@ -43,6 +47,9 @@ public class DataHandler : MonoBehaviour
         }
         else 
            Debug.LogError("Le fichier JSON est introuvable !");
+
+           // Get panel
+            PanelTransform = PointInfoPrefab.transform.Find("Panel");
     }
 
     private DataSet.DataSet LoadMapData(TextAsset textAsset) {
@@ -61,8 +68,9 @@ public class DataHandler : MonoBehaviour
             Vector3 pos = map.GeoToWorldPosition(latLng, false);
 
             GameObject dataPoint = Instantiate(PointPrefab,pos,Quaternion.identity);
+            
             MapDataPoint parameters = dataPoint.GetComponent<MapDataPoint>();
-
+            parameters.point = point;
             if(primaryField == null || primaryField.type == "string"){
                 parameters.height = 1;
             } else {
@@ -77,4 +85,36 @@ public class DataHandler : MonoBehaviour
             parameters.scale = pointsScale;
 
     }
+
+    public void ShowInfo(MapDataPoint dataPoint) {
+        //Show panel with info
+        PointInfoPrefab.SetActive(true);
+        PointInfoPrefab.transform.position =  dataPoint.top;
+
+        List<string[]> lstValue =  dataPoint.point.fields.Select( el => {
+            var def = mapData.dataset.fields.Find( f => f.id == el.id);
+            if(def != null) {
+                return new string[] {def.displayName,el.value};
+            } else {
+                return new string[] {el.id,el.value};
+            }
+        }).ToList();
+
+        foreach(Transform text in PanelTransform) {
+            Destroy(text.gameObject); 
+        }
+
+        lstValue.ForEach( txt => {
+            GameObject textInfoDescription = Instantiate(PointInfoText, PanelTransform.position, Quaternion.identity, PanelTransform);
+            textInfoDescription.GetComponent<Text>().text = txt[0];
+            GameObject textInfoValue = Instantiate(PointInfoText, PanelTransform.position, Quaternion.identity, PanelTransform);
+            textInfoValue.GetComponent<Text>().text = txt[1];
+        });
+    }
+
+    public void HideInfo() {
+         PointInfoPrefab.SetActive(false);
+    }
 }
+
+
