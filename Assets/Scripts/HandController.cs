@@ -15,6 +15,9 @@ public class HandController : MonoBehaviour
     MeshRenderer meshRenderer;
 
     LineRenderer lineRenderer;
+
+    private InputDevice device;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -25,6 +28,9 @@ public class HandController : MonoBehaviour
         text = new GameObject();
         textMesh = text.AddComponent<TextMesh>();
         meshRenderer = text.AddComponent<MeshRenderer>();
+
+        //get device
+        device = InputDevices.GetDeviceAtXRNode(handNode);
     }
 
     // Update is called once per frame
@@ -48,11 +54,22 @@ public class HandController : MonoBehaviour
         else {
            lineRenderer.SetPosition(1,transform.TransformDirection(Vector3.forward) * 1000);
         }
+
+        // check trigger press
+        bool triggerValue;
+        if(device.TryGetFeatureValue(CommonUsages.triggerButton, out triggerValue) && triggerValue) {
+            if(hit.collider.gameObject)
+            zoom(hit.point);
+        }
     }
 
     private void addTextNextToHand(Vector3 hitOnMap) {
         var geoLoc = imap.WorldToGeoPosition(hitOnMap);
         text.transform.position = this.transform.position + Vector3.left;
         textMesh.text = geoLoc.ToString();
+    }
+
+    private void zoom(Vector3 point) {
+
     }
 }

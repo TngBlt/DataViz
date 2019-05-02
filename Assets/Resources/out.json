@@ -127,7 +127,8 @@
                 "displayName": "surfacecadre_m2",
                 "type": "number"
             }
-        ]
+        ],
+        "primaryField": "hauteurtotale_m"
     },
     "data": [
         {
