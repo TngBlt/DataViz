@@ -128,7 +128,8 @@
                 "type": "number"
             }
         ],
-        "primaryField": "hauteurtotale_m"
+        "primaryField": "hauteurtotale_m",
+        "secondaryField": "essencefrancais"
     },
     "data": [
         {

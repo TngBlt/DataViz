@@ -19,6 +19,7 @@ namespace DataSet {
         public List<FieldDeclaration> fields;
 
         public string primaryField;
+        public string secondaryField;
     }
 
     [System.Serializable]
