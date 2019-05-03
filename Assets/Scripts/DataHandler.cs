@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
+using System;
 using System.Linq;
 using DataSet;
 using Mapbox.Unity.Map;
@@ -110,6 +111,18 @@ public class DataHandler : MonoBehaviour
             GameObject textInfoValue = Instantiate(PointInfoText, PanelTransform.position, Quaternion.identity, PanelTransform);
             textInfoValue.GetComponent<Text>().text = txt[1];
         });
+
+        var layout = PanelTransform.GetComponent<GridLayoutGroup>();
+        var height = lstValue.Count * layout.cellSize.y + layout.padding.vertical;
+        var panelRect = PanelTransform.GetComponent<RectTransform>();
+        panelRect.sizeDelta = new Vector2(panelRect.sizeDelta.x,height);
+
+        var distanceToFloor = (PointInfoPrefab.transform.position.y - ((height + layout.padding.bottom) * PointInfoPrefab.transform.localScale.y) ) - dataPoint.bottom.y;
+
+        if(distanceToFloor < 0){
+            PointInfoPrefab.transform.Translate(new Vector3(0,Math.Abs(distanceToFloor),0));
+        }
+
     }
 
     public void HideInfo() {

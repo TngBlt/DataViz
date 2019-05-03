@@ -20,6 +20,14 @@ public class MapDataPoint : MonoBehaviour
         }
     }
 
+    public Vector3 bottom {
+        get {
+            var pos = bar.transform.position;
+            pos.y -= bar.transform.localScale.y/2;
+            return pos;
+        }
+    }
+
     public float height {
         get { return _height; }
         set {
