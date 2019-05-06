@@ -129,7 +129,7 @@
             }
         ],
         "primaryField": "hauteurtotale_m",
-        "secondaryField": "essencefrancais"
+        "secondaryField": "circonference_cm"
     },
     "data": [
         {

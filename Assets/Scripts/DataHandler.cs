@@ -18,6 +18,7 @@ public class DataHandler : MonoBehaviour
     private FieldDeclaration secondaryField;
     private HeightVizualizer primaryVizualizer;
     private DiscreteColorVizualizer secondaryDiscreteVizualizer;
+    private RangeColorVizualizer rangeColorVizualizer;
     private AbstractMap map;
     public float pointsScale = 0.06f;
     public float maxHeight = 2.0f;
@@ -62,7 +63,7 @@ public class DataHandler : MonoBehaviour
         if(secondaryField.type == "string"){
             secondaryDiscreteVizualizer = new DiscreteColorVizualizer((mapData.data.Select(el => el.fields.Find(x => x.id == secondaryField.id).value)));
         } else if(secondaryField.type == "number") {
-            // CHARGER DE TYPE NUMBER
+            rangeColorVizualizer = new RangeColorVizualizer((mapData.data.Select(el => float.Parse(el.fields.Find(x => x.id == secondaryField.id).value))), Color.green, Color.red );
         } else {
             Debug.LogError("Unsupported type '"+secondaryField.type+"' on secondary field");
         }
@@ -100,9 +101,14 @@ public class DataHandler : MonoBehaviour
                     parameters.color = secondaryDiscreteVizualizer.getVizualization(val.value);
                 }
             }
+            else if(rangeColorVizualizer != null) {
+                FieldValue val = point.fields.Find(el => el.id == secondaryField.id);
+                if(val != null){
+                    parameters.color = rangeColorVizualizer.getVizualization(float.Parse(val.value));
+                }
+            }
 
             parameters.scale = pointsScale;
-
     }
 
     public void ShowInfo(MapDataPoint dataPoint) {
