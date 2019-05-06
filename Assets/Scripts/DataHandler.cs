@@ -9,12 +9,15 @@ using DataSet;
 using Mapbox.Unity.Map;
 using Mapbox.Unity.Utilities;
 using Mapbox.Utils;
+using vizualizers;
 
 public class DataHandler : MonoBehaviour
 {
     private DataSet.DataSet mapData;
     private FieldDeclaration primaryField;
-    private float primaryFiledMaxValue = 1f;
+    private FieldDeclaration secondaryField;
+    private HeightVizualizer primaryVizualizer;
+    private DiscreteColorVizualizer secondaryDiscreteVizualizer;
     private AbstractMap map;
     public float pointsScale = 0.06f;
     public float maxHeight = 2.0f;
@@ -32,15 +35,7 @@ public class DataHandler : MonoBehaviour
         // Load data from  JSOIN
         var jsonTextFile = Resources.Load<TextAsset>("out");
         if(jsonTextFile) {
-            mapData = LoadMapData(jsonTextFile);
-            
-            primaryField = mapData.dataset.fields.Find(el => el.id == mapData.dataset.primaryField);
-            if(primaryField.type == "string"){
-                Debug.LogError("Un champ de type 'string' ne peut être un champ primaire");
-            } else {
-                primaryFiledMaxValue = mapData.data.Select(el => el.fields.Find(x => x.id == primaryField.id)).Select(el => float.Parse(el.value)).Max();
-            }
-
+            LoadMapData(jsonTextFile);
             Debug.Log("Données chargées");
 
             var locOpt = map.Options.locationOptions;
@@ -53,8 +48,24 @@ public class DataHandler : MonoBehaviour
             PanelTransform = PointInfoPrefab.transform.Find("Panel");
     }
 
-    private DataSet.DataSet LoadMapData(TextAsset textAsset) {
-        return JsonUtility.FromJson<DataSet.DataSet>(textAsset.text);
+    private void LoadMapData(TextAsset textAsset) {
+        mapData = JsonUtility.FromJson<DataSet.DataSet>(textAsset.text);
+            
+        primaryField = mapData.dataset.fields.Find(el => el.id == mapData.dataset.primaryField);
+        if(primaryField.type == "number"){
+            primaryVizualizer = new HeightVizualizer(mapData.data.Select(el => el.fields.Find(x => x.id == primaryField.id)).Select(el => float.Parse(el.value)),maxHeight);
+        } else {
+            Debug.LogError("Unsupported type '"+secondaryField.type+"' on secondary field");
+        }
+
+        secondaryField = mapData.dataset.fields.Find(el => el.id == mapData.dataset.secondaryField);
+        if(secondaryField.type == "string"){
+            secondaryDiscreteVizualizer = new DiscreteColorVizualizer((mapData.data.Select(el => el.fields.Find(x => x.id == secondaryField.id).value)));
+        } else if(secondaryField.type == "number") {
+            // CHARGER DE TYPE NUMBER
+        } else {
+            Debug.LogError("Unsupported type '"+secondaryField.type+"' on secondary field");
+        }
     }
 
     private void LoadDataset() {
@@ -72,14 +83,21 @@ public class DataHandler : MonoBehaviour
             
             MapDataPoint parameters = dataPoint.GetComponent<MapDataPoint>();
             parameters.point = point;
-            if(primaryField == null || primaryField.type == "string"){
-                parameters.height = 1;
-            } else {
+            if(primaryVizualizer != null){
                 FieldValue val = point.fields.Find(el => el.id == primaryField.id);
                 if(val != null){
-                    parameters.height = (float.Parse(val.value) * maxHeight)/primaryFiledMaxValue;
+                    parameters.height = primaryVizualizer.getVizualization(float.Parse(val.value));
                 } else {
                     parameters.height = 0;
+                }
+            } else {
+                parameters.height = 1;
+            }
+
+            if(secondaryDiscreteVizualizer != null){
+                FieldValue val = point.fields.Find(el => el.id == secondaryField.id);
+                if(val != null){
+                    parameters.color = secondaryDiscreteVizualizer.getVizualization(val.value);
                 }
             }
 

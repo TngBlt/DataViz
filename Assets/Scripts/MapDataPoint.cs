@@ -9,7 +9,7 @@ public class MapDataPoint : MonoBehaviour
     public GameObject bar;
     private float _height;
     private float _scale = 0.06f;
-    public Color color;
+    private Color _color = new Color(0f,0.6f,1f,0.7f);
     public DataPoint point;
 
     public Vector3 top {
@@ -47,6 +47,18 @@ public class MapDataPoint : MonoBehaviour
             s.z = _scale;
             bar.transform.localScale = s;
             ResetPosition();
+        }
+    }
+
+    public Color color {
+        get { return _color; }
+        set {
+            _color = value;
+            _color.a = 0.7f;
+            Renderer rend = bar.GetComponent<Renderer>();
+            //rend.material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+            //rend.material.shader = Shader.Find("_Color");
+            rend.material.SetColor("_Color", _color);
         }
     }
 
