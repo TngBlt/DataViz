@@ -13,7 +13,6 @@ public class HandController : MonoBehaviour
     private DataHandler dataHandler;
     LineRenderer lineRenderer;
     private InputDevice device;
-    private bool isOverBar;
 
     // Start is called before the first frame update
     void Start()
@@ -37,29 +36,24 @@ public class HandController : MonoBehaviour
         lineRenderer.SetPosition(0,transform.position);
 
         RaycastHit hit;
+        bool hasHit = Physics.Raycast(transform.position,transform.TransformDirection(Vector3.forward), out hit, 1000);
 
-        if(Physics.Raycast(transform.position,transform.TransformDirection(Vector3.forward), out hit, 1000)) {
-            if(hit.collider.GetComponentInParent<MapDataPoint>() != null) {
-                isOverBar = true;
-                dataHandler.ShowInfo(hit.collider.GetComponentInParent<MapDataPoint>());
-            }
-            else {
-                isOverBar = false;
-                dataHandler.HideInfo();
-            }
+        if(hasHit) {        	
             lineRenderer.SetPosition(1,hit.point);
-        }
-            
-        else {
+        } else {
             lineRenderer.SetPosition(1,transform.TransformDirection(Vector3.forward) * 1000);
         }
 
         gameObject.transform.Rotate(0, 180, 0);
         // check trigger press
-        //bool triggerValue;
-        // if(device.TryGetFeatureValue(CommonUsages.triggerButton, out triggerValue) && triggerValue) {
-        //     if(hit.collider.gameObject)
-        //     zoom(hit.point);
-        // }
+        bool triggerValue;
+        if(device.TryGetFeatureValue(CommonUsages.triggerButton, out triggerValue) && triggerValue) {
+			if(hasHit && hit.collider.GetComponentInParent<MapDataPoint>() != null) {
+                dataHandler.ShowInfo(hit.collider.GetComponentInParent<MapDataPoint>());
+            }
+            else {
+                dataHandler.HideInfo();
+            }
+        }
     }
 }

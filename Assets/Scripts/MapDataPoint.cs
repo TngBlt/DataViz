@@ -59,6 +59,7 @@ public class MapDataPoint : MonoBehaviour
             //rend.material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
             //rend.material.shader = Shader.Find("_Color");
             rend.material.SetColor("_Color", _color);
+            rend.material.SetColor("_EmissionColor", _color);
         }
     }
 
