@@ -54,6 +54,7 @@ public class HandController : MonoBehaviour
             lineRenderer.SetPosition(1,transform.TransformDirection(Vector3.forward) * 1000);
         }
 
+        gameObject.transform.Rotate(0, 180, 0);
         // check trigger press
         //bool triggerValue;
         // if(device.TryGetFeatureValue(CommonUsages.triggerButton, out triggerValue) && triggerValue) {

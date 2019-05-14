@@ -1,0 +1,16 @@
+{
+  "source": "Unity",
+  "applications": [
+    {
+      "app_key": "application.generated.unity.dataviz_a4.exe",
+      "launch_type": "url",
+      "url": "steam://launch/",
+      "action_manifest_path": "D:\\Documents\\Dev\\DataViz\\actions.json",
+      "strings": {
+        "en_us": {
+          "name": "DataViz_A4 [Testing]"
+        }
+      }
+    }
+  ]
+}
