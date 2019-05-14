@@ -128,14 +128,19 @@ public class DataHandler : MonoBehaviour
         foreach(Transform text in PanelTransform) {
             Destroy(text.gameObject); 
         }
+        
+        PointInfoPrefab.transform.LookAt(Camera.main.transform.position);
+        float yAxe = PointInfoPrefab.transform.eulerAngles.y;
+        PointInfoPrefab.transform.eulerAngles = new Vector3(0, yAxe+180, 0);
 
 
         lstValue.ForEach( txt => {
-            GameObject textInfoDescription = Instantiate(PointInfoText, PanelTransform.position, Quaternion.identity, PanelTransform);
+            GameObject textInfoDescription = Instantiate(PointInfoText, PanelTransform.position, PointInfoPrefab.transform.rotation, PanelTransform);
             textInfoDescription.GetComponent<Text>().text = txt[0];
-            GameObject textInfoValue = Instantiate(PointInfoText, PanelTransform.position, Quaternion.identity, PanelTransform);
+            GameObject textInfoValue = Instantiate(PointInfoText, PanelTransform.position, PointInfoPrefab.transform.rotation, PanelTransform);
             textInfoValue.GetComponent<Text>().text = txt[1];
         });
+
         var layout = PanelTransform.GetComponent<GridLayoutGroup>();
         var height = lstValue.Count * layout.cellSize.y + layout.padding.vertical;
         var panelRect = PanelTransform.GetComponent<RectTransform>();
@@ -146,10 +151,6 @@ public class DataHandler : MonoBehaviour
         if(distanceToFloor < 0){
             PointInfoPrefab.transform.Translate(new Vector3(0,Math.Abs(distanceToFloor),0));
         }
-        
-        PointInfoPrefab.transform.LookAt(Camera.main.transform.position);
-        float yAxe = PointInfoPrefab.transform.eulerAngles.y;
-        PointInfoPrefab.transform.eulerAngles = new Vector3(0, yAxe+180, 0);
 
     }
 
