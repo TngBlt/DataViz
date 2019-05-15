@@ -13,19 +13,22 @@ using vizualizers;
 
 public class DataHandler : MonoBehaviour
 {
-    private DataSet.DataSet mapData;
-    private FieldDeclaration primaryField;
-    private FieldDeclaration secondaryField;
     private HeightVizualizer primaryVizualizer;
     private DiscreteColorVizualizer secondaryDiscreteVizualizer;
     private RangeColorVizualizer rangeColorVizualizer;
     private AbstractMap map;
+
     public float pointsScale = 0.06f;
     public float maxHeight = 2.0f;
+
     public GameObject PointPrefab;
     public GameObject PointInfoPrefab;
     public GameObject PointInfoText;
     public Transform PanelTransform;
+    public DataLoader DataLoader;
+
+    public GameObject zoomMap;
+    public float zoomedHeight = 0.5f;
 
     // Start is called before the first frame update
     void Start()
@@ -33,33 +36,28 @@ public class DataHandler : MonoBehaviour
         map = GetComponent<AbstractMap>();
         map.OnInitialized += LoadDataset;
 
-        // Load data from  JSOIN
-        var jsonTextFile = Resources.Load<TextAsset>("out");
-        if(jsonTextFile) {
-            LoadMapData(jsonTextFile);
-            Debug.Log("Données chargées");
-
-            var locOpt = map.Options.locationOptions;
-            map.Initialize(Conversions.StringToLatLon(locOpt.latitudeLongitude),(int) locOpt.zoom);
+        if(DataLoader.loaded){
+            this.LoadMapData();
+        } else {
+            DataLoader.onLoaded = delegate(DataSet.DataSet dataset, DataLoader loader){ this.LoadMapData(); };
         }
-        else 
-           Debug.LogError("Le fichier JSON est introuvable !");
+        // Get panel
+        PanelTransform = PointInfoPrefab.transform.Find("Panel");
 
-           // Get panel
-            PanelTransform = PointInfoPrefab.transform.Find("Panel");
+        HideInfo();
     }
 
-    private void LoadMapData(TextAsset textAsset) {
-        mapData = JsonUtility.FromJson<DataSet.DataSet>(textAsset.text);
+    private void LoadMapData() {
+        var mapData = DataLoader.data;
             
-        primaryField = mapData.dataset.fields.Find(el => el.id == mapData.dataset.primaryField);
+        var primaryField = DataLoader.primaryField;
         if(primaryField.type == "number"){
             primaryVizualizer = new HeightVizualizer(mapData.data.Select(el => el.fields.Find(x => x.id == primaryField.id)).Select(el => float.Parse(el.value)),maxHeight);
         } else {
-            Debug.LogError("Unsupported type '"+secondaryField.type+"' on secondary field");
+            Debug.LogError("Unsupported type '"+primaryField.type+"' on secondary field");
         }
 
-        secondaryField = mapData.dataset.fields.Find(el => el.id == mapData.dataset.secondaryField);
+        var secondaryField = DataLoader.secondaryField;
         if(secondaryField.type == "string"){
             secondaryDiscreteVizualizer = new DiscreteColorVizualizer((mapData.data.Select(el => el.fields.Find(x => x.id == secondaryField.id).value)));
         } else if(secondaryField.type == "number") {
@@ -67,9 +65,13 @@ public class DataHandler : MonoBehaviour
         } else {
             Debug.LogError("Unsupported type '"+secondaryField.type+"' on secondary field");
         }
+
+        var locOpt = map.Options.locationOptions;
+        map.Initialize(Conversions.StringToLatLon(locOpt.latitudeLongitude),(int) locOpt.zoom);
     }
 
     private void LoadDataset() {
+        var mapData = DataLoader.data;
         foreach(DataPoint dataPoint in mapData.data) {
             CreatePoint(dataPoint);
         }
@@ -83,7 +85,10 @@ public class DataHandler : MonoBehaviour
             GameObject dataPoint = Instantiate(PointPrefab,pos,Quaternion.identity);
             
             MapDataPoint parameters = dataPoint.GetComponent<MapDataPoint>();
+            var secondaryField = DataLoader.secondaryField;
+            var primaryField = DataLoader.primaryField;
             parameters.point = point;
+            
             if(primaryVizualizer != null){
                 FieldValue val = point.fields.Find(el => el.id == primaryField.id);
                 if(val != null){
@@ -115,6 +120,7 @@ public class DataHandler : MonoBehaviour
         //Show panel with info
         PointInfoPrefab.SetActive(true);
         PointInfoPrefab.transform.position =  dataPoint.top;
+        var mapData = DataLoader.data;
 
         List<string[]> lstValue =  dataPoint.point.fields.Select( el => {
             var def = mapData.dataset.fields.Find( f => f.id == el.id);
@@ -156,6 +162,18 @@ public class DataHandler : MonoBehaviour
 
     public void HideInfo() {
          PointInfoPrefab.SetActive(false);
+    }
+
+    public void Zoom(Vector3 mapPos, float zoom = 16f){
+
+        mapPos.y += zoomedHeight;
+        zoomMap.transform.position = mapPos;
+
+        zoomMap.SetActive(true);
+
+        Vector2d center = map.WorldToGeoPosition(mapPos);
+        AbstractMap zoomedMap = zoomMap.GetComponent<AbstractMap>();
+        zoomedMap.UpdateMap(center,zoom);
     }
 }
 
