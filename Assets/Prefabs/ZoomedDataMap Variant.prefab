@@ -85,12 +85,12 @@ PrefabInstance:
     - target: {fileID: 8290762880880233774, guid: 033336a44b1bca14d868fa22546676f6,
         type: 3}
       propertyPath: _options.extentOptions.defaultExtents.rangeAroundCenterOptions.north
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8290762880880233774, guid: 033336a44b1bca14d868fa22546676f6,
         type: 3}
       propertyPath: _options.extentOptions.defaultExtents.rangeAroundCenterOptions.east
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8290762880880233774, guid: 033336a44b1bca14d868fa22546676f6,
         type: 3}

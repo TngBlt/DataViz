@@ -30,6 +30,18 @@ public class DataHandler : MonoBehaviour
     public GameObject zoomMap;
     public float zoomedHeight = 0.5f;
 
+    private GameObject pointsGroup;
+
+    public Bounds boundingBox {
+        get {
+            var b = new Bounds(transform.position, Vector3.zero);
+            foreach (Renderer r in GetComponentsInChildren<Renderer>()) {
+                b.Encapsulate(r.bounds);
+            }
+            return b;
+        }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -39,10 +51,12 @@ public class DataHandler : MonoBehaviour
         if(DataLoader.loaded){
             this.LoadMapData();
         } else {
-            DataLoader.onLoaded = delegate(DataSet.DataSet dataset, DataLoader loader){ this.LoadMapData(); };
+            DataLoader.onLoaded += delegate(DataSet.DataSet dataset, DataLoader loader){ this.LoadMapData(); };
         }
         // Get panel
         PanelTransform = PointInfoPrefab.transform.Find("Panel");
+
+        pointsGroup = new GameObject("MapPointGroup");
 
         HideInfo();
     }
@@ -82,7 +96,7 @@ public class DataHandler : MonoBehaviour
             Vector2d latLng = new Vector2d(point.point[1], point.point[0]);
             Vector3 pos = map.GeoToWorldPosition(latLng, false);
 
-            GameObject dataPoint = Instantiate(PointPrefab,pos,Quaternion.identity);
+            GameObject dataPoint = Instantiate(PointPrefab,pos,Quaternion.identity,pointsGroup.transform);
             
             MapDataPoint parameters = dataPoint.GetComponent<MapDataPoint>();
             var secondaryField = DataLoader.secondaryField;
@@ -114,6 +128,34 @@ public class DataHandler : MonoBehaviour
             }
 
             parameters.scale = pointsScale;
+    }
+
+    private void UpdatePoint(GameObject datapoint){
+        MapDataPoint dataPointScript = datapoint.GetComponent<MapDataPoint>();
+        Vector2d latLng = new Vector2d(dataPointScript.point.point[1], dataPointScript.point.point[0]);
+        Vector3 pos = map.GeoToWorldPosition(latLng, false);
+        datapoint.transform.position = pos;
+        dataPointScript.ResetPosition();
+        if(boundingBox.Contains(pos)){
+            datapoint.SetActive(true);
+        } else {
+            datapoint.SetActive(false);
+        }
+        if(zoomMap != null){
+            Bounds zoombb = zoomMap.GetComponent<DataHandler>().boundingBox;
+            zoombb.Expand(new Vector3(0,10,0));
+            if(zoombb.Contains(pos)){
+                datapoint.SetActive(false);
+            }
+        }
+    }
+
+    public void UpdateAllPoints(){
+        foreach (Transform child in pointsGroup.transform) {
+            if(child.GetComponent<MapDataPoint>() != null){
+                UpdatePoint(child.gameObject);
+            }
+        }
     }
 
     public void ShowInfo(MapDataPoint dataPoint) {
@@ -174,6 +216,8 @@ public class DataHandler : MonoBehaviour
         Vector2d center = map.WorldToGeoPosition(mapPos);
         AbstractMap zoomedMap = zoomMap.GetComponent<AbstractMap>();
         zoomedMap.UpdateMap(center,zoom);
+        zoomMap.GetComponent<DataHandler>().UpdateAllPoints();
+        UpdateAllPoints();
     }
 }
 

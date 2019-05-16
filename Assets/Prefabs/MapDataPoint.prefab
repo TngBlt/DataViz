@@ -45,7 +45,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bar: {fileID: 6399052604091056752}
-  color: {r: 0, g: 0, b: 0, a: 0}
   point:
     point: []
     fields: []
@@ -61,6 +60,7 @@ GameObject:
   - component: {fileID: 2463895379608020159}
   - component: {fileID: 1845786450027542522}
   - component: {fileID: 1602849370312898349}
+  - component: {fileID: 7464683983748406768}
   m_Layer: 0
   m_Name: Bar
   m_TagString: Untagged
@@ -135,8 +135,20 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6399052604091056752}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &7464683983748406768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6399052604091056752}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 480f93de978d85a4bb3962e061c8acef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

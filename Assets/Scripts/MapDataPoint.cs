@@ -72,9 +72,9 @@ public class MapDataPoint : MonoBehaviour
             bar.transform.gameObject.SetActive(false);
     }
 
-    private void ResetPosition() {
-        Vector3 pos = bar.transform.position;
+    public void ResetPosition() {
+        Vector3 pos = bar.transform.localPosition;
         pos.y = bar.transform.localScale.y/2; 
-        bar.transform.position = pos;
+        bar.transform.localPosition = pos;
     }
 }
