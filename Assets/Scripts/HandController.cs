@@ -15,9 +15,8 @@ public class HandController : MonoBehaviour
     LineRenderer lineRenderer;
     private InputDevice device;
 
-    public GameObject selectTooltip;
-    public GameObject timeTooltip;
-    public GameObject zoomTooltip;
+    public ControllerTooltip TriggerTooltip;
+    public ControllerTooltip GrabTooltip;
 
     public GameObject selectionModel;
 
@@ -52,25 +51,27 @@ public class HandController : MonoBehaviour
             lineRenderer.SetPosition(1,hit.point);
 
             if(hit.collider.GetComponentInParent<MapDataPoint>() != null){
-            	selectTooltip.SetActive(true);
-            } else {
-            	selectTooltip.SetActive(false);
-            }
-
-            if (hit.collider.GetComponentInParent<AbstractMap>() == imap){
-            	zoomTooltip.SetActive(true);
-            	selectionModel.SetActive(true);
+            	TriggerTooltip.enabled = true;
+                TriggerTooltip.text = "Sélectionner";
+                selectionModel.SetActive(false);
+            } else if (hit.collider.GetComponentInParent<AbstractMap>() == imap) {
+            	TriggerTooltip.enabled = true;
+                TriggerTooltip.text = "Zoomer";
+                selectionModel.SetActive(true);
             	selectionModel.transform.position = hit.point;
             	selectionModel.transform.up = Vector3.up;
+            } else if(hit.collider.gameObject.tag == "ui-close") {
+            	TriggerTooltip.enabled = true;
+                TriggerTooltip.text = "Fermer";
+                selectionModel.SetActive(false);
             } else {
-            	zoomTooltip.SetActive(false);
+            	TriggerTooltip.enabled = false;
             	selectionModel.SetActive(false);
             }
-
         } else {
             lineRenderer.SetPosition(1,transform.TransformDirection(Vector3.forward) * 1000);
-            selectTooltip.SetActive(false);
-            zoomTooltip.SetActive(false);
+            TriggerTooltip.enabled = false;
+            selectionModel.SetActive(false);
         }
 
         // check trigger press
@@ -88,6 +89,10 @@ public class HandController : MonoBehaviour
 
             if(!isTriggering && hasHit && hit.collider.GetComponentInParent<AbstractMap>() == imap){
             	dataHandler.Zoom(hit.point);
+            }
+
+            if(hasHit && hit.collider.gameObject.tag == "ui-close"){
+                hit.collider.GetComponentInParent<DataHandler>().Hide();
             }
 
             isTriggering = true;

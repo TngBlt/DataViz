@@ -32,6 +32,12 @@ public class DataHandler : MonoBehaviour
 
     private GameObject pointsGroup;
 
+    public bool canClose;
+
+    public GameObject closeCanvas;
+
+    public DataHandler parentMap;
+
     public Bounds boundingBox {
         get {
             var b = new Bounds(transform.position, Vector3.zero);
@@ -47,6 +53,7 @@ public class DataHandler : MonoBehaviour
     {
         map = GetComponent<AbstractMap>();
         map.OnInitialized += LoadDataset;
+        map.OnUpdated += UpdateUi;
 
         if(DataLoader.loaded){
             this.LoadMapData();
@@ -141,11 +148,13 @@ public class DataHandler : MonoBehaviour
         } else {
             datapoint.SetActive(false);
         }
-        if(zoomMap != null){
+        if(zoomMap != null && zoomMap.activeSelf){
             Bounds zoombb = zoomMap.GetComponent<DataHandler>().boundingBox;
             zoombb.Expand(new Vector3(0,10,0));
             if(zoombb.Contains(pos)){
-                datapoint.SetActive(false);
+                dataPointScript.muted = true;
+            } else {
+                dataPointScript.muted = false;
             }
         }
     }
@@ -202,21 +211,50 @@ public class DataHandler : MonoBehaviour
 
     }
 
+    public void UpdateUi(){
+        if(canClose){
+            closeCanvas.SetActive(true);
+            Bounds bb = boundingBox;
+            Vector3 closePos = bb.min;
+            closePos.y = transform.position.y;
+            closeCanvas.transform.position = closePos;
+        }
+    }
+
+    public void Hide(){
+        gameObject.SetActive(false);
+        pointsGroup.SetActive(false);
+        if(parentMap != null){
+            parentMap.UpdateAllPoints();
+        }
+    }
+
+    public void Show(){
+        gameObject.SetActive(true);
+        pointsGroup.SetActive(true);
+    }
+
+    public void UpdateMap(Vector2d latLng, float zoom){
+        AbstractMap zoomedMap = GetComponent<AbstractMap>();
+        zoomedMap.UpdateMap(latLng,zoom);
+        UpdateAllPoints();
+    }
+
     public void HideInfo() {
          PointInfoPrefab.SetActive(false);
     }
 
-    public void Zoom(Vector3 mapPos, float zoom = 16f){
+    public void Zoom(Vector3 mapPos, float zoom = 17f){
 
         mapPos.y += zoomedHeight;
         zoomMap.transform.position = mapPos;
 
-        zoomMap.SetActive(true);
+        DataHandler handler = zoomMap.GetComponent<DataHandler>();
+
+        handler.Show();
 
         Vector2d center = map.WorldToGeoPosition(mapPos);
-        AbstractMap zoomedMap = zoomMap.GetComponent<AbstractMap>();
-        zoomedMap.UpdateMap(center,zoom);
-        zoomMap.GetComponent<DataHandler>().UpdateAllPoints();
+        handler.UpdateMap(center,zoom);
         UpdateAllPoints();
     }
 }

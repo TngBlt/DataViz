@@ -9,6 +9,7 @@ public class MapDataPoint : MonoBehaviour
 {
 
     public GameObject bar;
+    private bool _muted;
     private float _height;
     private float _scale = 0.06f;
     private Color _color = new Color(0f,0.6f,1f,0.7f);
@@ -34,10 +35,7 @@ public class MapDataPoint : MonoBehaviour
         get { return _height; }
         set {
             _height = value;
-            Vector3 s = bar.transform.localScale;
-            s.y = _height;
-            bar.transform.localScale = s;
-            ResetPosition();
+                this.SetHeight(_height);
         }
     }
     public float scale {
@@ -51,18 +49,44 @@ public class MapDataPoint : MonoBehaviour
             ResetPosition();
         }
     }
+    public bool muted {
+        get { return _muted; }
+        set {
+            _muted = value;
+            if(_muted){
+                this.SetHeight(0.05f);
+                Color mutedColor = new Color(_color.r,_color.g,_color.b,_color.a);
+                mutedColor.a = 0.1f;
+                SetColor(mutedColor);
+            } else {
+                this.SetHeight(_height);
+                SetColor(_color);
+            }
+        }
+    }
 
     public Color color {
         get { return _color; }
         set {
             _color = value;
             _color.a = 0.7f;
+            SetColor(_color);
+        }
+    }
+
+    private void SetHeight(float height){
+                Vector3 s = bar.transform.localScale;
+                s.y = height;
+                bar.transform.localScale = s;
+                ResetPosition();
+    }
+
+    private void SetColor(Color color){
             Renderer rend = bar.GetComponent<Renderer>();
             //rend.material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
             //rend.material.shader = Shader.Find("_Color");
-            rend.material.SetColor("_Color", _color);
-            rend.material.SetColor("_EmissionColor", _color);
-        }
+            rend.material.SetColor("_Color", color);
+            rend.material.SetColor("_EmissionColor", color);
     }
 
     // Start is called before the first frame update
