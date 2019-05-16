@@ -515,6 +515,12 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 4015621838922637018}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &922662785 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4986347548480702296, guid: 9a75d86781a2e3e4fa744f9d3efafa4a,
+    type: 3}
+  m_PrefabInstance: {fileID: 4015621838922637018}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &143958494170665456
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -694,6 +700,31 @@ PrefabInstance:
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 534669904}
+    - target: {fileID: 4950843714862366830, guid: 9a75d86781a2e3e4fa744f9d3efafa4a,
+        type: 3}
+      propertyPath: _options.extentOptions.extentType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4950843714862366830, guid: 9a75d86781a2e3e4fa744f9d3efafa4a,
+        type: 3}
+      propertyPath: _options.extentOptions.defaultExtents.rangeAroundTransformOptions.targetTransform
+      value: 
+      objectReference: {fileID: 922662785}
+    - target: {fileID: 4950843714862366830, guid: 9a75d86781a2e3e4fa744f9d3efafa4a,
+        type: 3}
+      propertyPath: _options.extentOptions.defaultExtents.rangeAroundTransformOptions.visibleBuffer
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4950843714862366830, guid: 9a75d86781a2e3e4fa744f9d3efafa4a,
+        type: 3}
+      propertyPath: _options.extentOptions.defaultExtents.rangeAroundTransformOptions.disposeBuffer
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4950843714862366830, guid: 9a75d86781a2e3e4fa744f9d3efafa4a,
+        type: 3}
+      propertyPath: _options.scalingOptions.unityTileSize
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 4016165856338850778, guid: 9a75d86781a2e3e4fa744f9d3efafa4a,
         type: 3}
       propertyPath: m_SizeDelta.x

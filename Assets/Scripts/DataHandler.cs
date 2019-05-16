@@ -6,10 +6,12 @@ using System.IO;
 using System;
 using System.Linq;
 using DataSet;
+using Tiequar;
 using Mapbox.Unity.Map;
 using Mapbox.Unity.Utilities;
 using Mapbox.Utils;
 using vizualizers;
+using UnityEngine.Networking;
 
 public class DataHandler : MonoBehaviour
 {
@@ -35,8 +37,12 @@ public class DataHandler : MonoBehaviour
     public bool canClose;
 
     public GameObject closeCanvas;
+    public GameObject tiequarCanvas;
 
     public DataHandler parentMap;
+
+    public Text SuburbText;
+    public Text CityDistrictText;
 
     public Bounds boundingBox {
         get {
@@ -156,7 +162,9 @@ public class DataHandler : MonoBehaviour
             } else {
                 dataPointScript.muted = false;
             }
-        }
+        } else {
+                dataPointScript.muted = false;
+            }
     }
 
     public void UpdateAllPoints(){
@@ -212,13 +220,20 @@ public class DataHandler : MonoBehaviour
     }
 
     public void UpdateUi(){
+         Bounds bb = boundingBox;
         if(canClose){
             closeCanvas.SetActive(true);
-            Bounds bb = boundingBox;
+           
             Vector3 closePos = bb.min;
             closePos.y = transform.position.y;
             closeCanvas.transform.position = closePos;
         }
+
+            Vector3 tiequarPos = bb.min;
+            tiequarPos.y = transform.position.y;
+            tiequarPos.z = bb.max.z;
+            tiequarCanvas.transform.position = tiequarPos;
+        
     }
 
     public void Hide(){
@@ -237,6 +252,9 @@ public class DataHandler : MonoBehaviour
     public void UpdateMap(Vector2d latLng, float zoom){
         AbstractMap zoomedMap = GetComponent<AbstractMap>();
         zoomedMap.UpdateMap(latLng,zoom);
+        if(parentMap != null) {
+            StartCoroutine(GetTiequarName(latLng));
+        }
         UpdateAllPoints();
     }
 
@@ -256,6 +274,24 @@ public class DataHandler : MonoBehaviour
         Vector2d center = map.WorldToGeoPosition(mapPos);
         handler.UpdateMap(center,zoom);
         UpdateAllPoints();
+    }
+
+    private IEnumerator GetTiequarName(Vector2d LatLng) {
+        tiequarCanvas.SetActive(false);
+        UnityWebRequest request = UnityWebRequest.Get("https://nominatim.openstreetmap.org/reverse?lat="+LatLng.x.ToString().Replace(',','.')+"&lon="+LatLng.y.ToString().Replace(',','.')+"&format=json&zoom=14");
+        request.SetRequestHeader("User-Agent","DataViz CESI Lyon A4");
+        yield return request.SendWebRequest();
+
+        if(request.isNetworkError || request.isHttpError) {
+            Debug.Log(request.error);
+        }
+        else {
+            Tiequar.RootObject tiequar = JsonUtility.FromJson<Tiequar.RootObject>(request.downloadHandler.text);
+            string[] displayName = tiequar.display_name.Split(',');
+            SuburbText.text = displayName[0];
+            CityDistrictText.text = displayName[1];
+            tiequarCanvas.SetActive(true);
+        }
     }
 }
 
