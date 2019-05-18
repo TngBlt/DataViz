@@ -829,10 +829,20 @@ PrefabInstance:
       propertyPath: zoomMap
       value: 
       objectReference: {fileID: 922662781}
+    - target: {fileID: 8290762880880233774, guid: 033336a44b1bca14d868fa22546676f6,
+        type: 3}
+      propertyPath: _options.locationOptions.zoom
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 2070115447540154728, guid: 033336a44b1bca14d868fa22546676f6,
         type: 3}
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 534669904}
+    - target: {fileID: 3069995428678554273, guid: 033336a44b1bca14d868fa22546676f6,
+        type: 3}
+      propertyPath: _options.locationOptions.zoom
+      value: 13
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 033336a44b1bca14d868fa22546676f6, type: 3}

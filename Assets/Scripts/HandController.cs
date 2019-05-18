@@ -54,16 +54,16 @@ public class HandController : MonoBehaviour
             	TriggerTooltip.enabled = true;
                 TriggerTooltip.text = "Sélectionner";
                 selectionModel.SetActive(false);
-            } else if (hit.collider.GetComponentInParent<AbstractMap>() == imap) {
+            } else if(hit.collider.gameObject.tag == "ui-close") {
+            	TriggerTooltip.enabled = true;
+                TriggerTooltip.text = "Fermer";
+                selectionModel.SetActive(false);
+            } else if (hit.collider.GetComponentInParent<DataHandler>() == dataHandler) {
             	TriggerTooltip.enabled = true;
                 TriggerTooltip.text = "Zoomer";
                 selectionModel.SetActive(true);
             	selectionModel.transform.position = hit.point;
             	selectionModel.transform.up = Vector3.up;
-            } else if(hit.collider.gameObject.tag == "ui-close") {
-            	TriggerTooltip.enabled = true;
-                TriggerTooltip.text = "Fermer";
-                selectionModel.SetActive(false);
             } else {
             	TriggerTooltip.enabled = false;
             	selectionModel.SetActive(false);
@@ -72,6 +72,10 @@ public class HandController : MonoBehaviour
             lineRenderer.SetPosition(1,transform.TransformDirection(Vector3.forward) * 1000);
             TriggerTooltip.enabled = false;
             selectionModel.SetActive(false);
+        }
+
+        if(!device.isValid){
+            device = InputDevices.GetDeviceAtXRNode(handNode);
         }
 
         // check trigger press
@@ -87,7 +91,7 @@ public class HandController : MonoBehaviour
                 dataHandler.HideInfo();
             }
 
-            if(!isTriggering && hasHit && hit.collider.GetComponentInParent<AbstractMap>() == imap){
+            if(!isTriggering && hasHit && hit.collider.GetComponentInParent<DataHandler>() == dataHandler){
             	dataHandler.Zoom(hit.point);
             }
 

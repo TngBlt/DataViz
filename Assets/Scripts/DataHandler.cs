@@ -44,10 +44,13 @@ public class DataHandler : MonoBehaviour
     public Text SuburbText;
     public Text CityDistrictText;
 
+    public GameObject BorderObject;
+
     public Bounds boundingBox {
         get {
-            var b = new Bounds(transform.position, Vector3.zero);
-            foreach (Renderer r in GetComponentsInChildren<Renderer>()) {
+
+            var b = new Bounds(map.gameObject.transform.position, Vector3.zero);
+            foreach (Renderer r in map.GetComponentsInChildren<Renderer>()) {
                 b.Encapsulate(r.bounds);
             }
             return b;
@@ -57,7 +60,9 @@ public class DataHandler : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        map = GetComponent<AbstractMap>();
+        pointsGroup = new GameObject("MapPointGroup");
+
+        map = GetComponentInChildren<AbstractMap>();
         map.OnInitialized += LoadDataset;
         map.OnUpdated += UpdateUi;
 
@@ -68,8 +73,6 @@ public class DataHandler : MonoBehaviour
         }
         // Get panel
         PanelTransform = PointInfoPrefab.transform.Find("Panel");
-
-        pointsGroup = new GameObject("MapPointGroup");
 
         HideInfo();
     }
@@ -106,6 +109,7 @@ public class DataHandler : MonoBehaviour
     }
 
     private void CreatePoint(DataPoint point){
+
             Vector2d latLng = new Vector2d(point.point[1], point.point[0]);
             Vector3 pos = map.GeoToWorldPosition(latLng, false);
 
@@ -156,7 +160,7 @@ public class DataHandler : MonoBehaviour
         }
         if(zoomMap != null && zoomMap.activeSelf){
             Bounds zoombb = zoomMap.GetComponent<DataHandler>().boundingBox;
-            zoombb.Expand(new Vector3(0,10,0));
+            zoombb.Expand(new Vector3(0.5f,10,0.5f));
             if(zoombb.Contains(pos)){
                 dataPointScript.muted = true;
             } else {
@@ -229,11 +233,13 @@ public class DataHandler : MonoBehaviour
             closeCanvas.transform.position = closePos;
         }
 
-            Vector3 tiequarPos = bb.min;
-            tiequarPos.y = transform.position.y;
-            tiequarPos.z = bb.max.z;
-            tiequarCanvas.transform.position = tiequarPos;
+        Vector3 tiequarPos = bb.min;
+        tiequarPos.y = transform.position.y;
+        tiequarPos.z = bb.max.z;
+        tiequarCanvas.transform.position = tiequarPos;
         
+        BorderObject.transform.position = bb.center + new Vector3(0,-0.0001f ,0);
+        BorderObject.transform.localScale = bb.size / 10f + new Vector3(0.003f,1,0.003f);
     }
 
     public void Hide(){
@@ -250,7 +256,7 @@ public class DataHandler : MonoBehaviour
     }
 
     public void UpdateMap(Vector2d latLng, float zoom){
-        AbstractMap zoomedMap = GetComponent<AbstractMap>();
+        AbstractMap zoomedMap = GetComponentInChildren<AbstractMap>();
         zoomedMap.UpdateMap(latLng,zoom);
         if(parentMap != null) {
             StartCoroutine(GetTiequarName(latLng));
@@ -262,7 +268,11 @@ public class DataHandler : MonoBehaviour
          PointInfoPrefab.SetActive(false);
     }
 
-    public void Zoom(Vector3 mapPos, float zoom = 17f){
+    public void Zoom(Vector3 mapPos, float zoom = -1){
+
+        if(zoom < 0){
+            zoom = map.Options.locationOptions.zoom + 3;
+        }
 
         mapPos.y += zoomedHeight;
         zoomMap.transform.position = mapPos;
