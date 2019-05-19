@@ -14,8 +14,8 @@ namespace vizualizers {
         public HeightVizualizer(IEnumerable<float> data, float maxHeight, float minHeight = 0){
             this.maxHeight = maxHeight;
             this.minHeight = minHeight;
-            maxDataValue = data.Max();
-            minDataValue = data.Min();
+            maxDataValue = data.Max() + 1;
+            minDataValue = data.Min() - 1;
         }
 
         public float getVizualization(float input){

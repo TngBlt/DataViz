@@ -8,7 +8,7 @@ namespace DataSet {
     public class FieldDeclaration
     {
         public string id;
-        public string displayName;
+        public string displayname;
         public string type;
     }
 
@@ -23,6 +23,13 @@ namespace DataSet {
     }
 
     [System.Serializable]
+    public class TimeValue
+    {
+        public long timestamp;
+        public List<FieldValue> fields;
+    }
+
+    [System.Serializable]
     public class FieldValue
     {
         public string id;
@@ -33,7 +40,7 @@ namespace DataSet {
     public class DataPoint
     {
         public List<double> point;
-        public List<FieldValue> fields;
+        public List<TimeValue> values;
     }
 
     [System.Serializable]

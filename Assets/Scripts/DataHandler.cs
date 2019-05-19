@@ -12,6 +12,7 @@ using Mapbox.Unity.Utilities;
 using Mapbox.Utils;
 using vizualizers;
 using UnityEngine.Networking;
+using System.Globalization;
 
 public class DataHandler : MonoBehaviour
 {
@@ -45,6 +46,30 @@ public class DataHandler : MonoBehaviour
     public Text CityDistrictText;
 
     public GameObject BorderObject;
+
+    private TimeManager timeManager;
+
+    [SerializeField]
+    private long date;
+
+    private MapDataPoint shownInfo = null;
+
+    public long displayedDate {
+        get {return date; }
+        set { 
+            long newDate = timeManager.GetNearest(value);
+            if(newDate != date){
+                date = newDate;
+                if(zoomMap != null){
+                    zoomMap.GetComponent<DataHandler>().displayedDate = date;
+                }
+                UpdateAllPoints();
+                if(shownInfo != null){
+                    updateInfoPanel(shownInfo);
+                }
+            }
+        }
+    }
 
     public Bounds boundingBox {
         get {
@@ -82,19 +107,55 @@ public class DataHandler : MonoBehaviour
             
         var primaryField = DataLoader.primaryField;
         if(primaryField.type == "number"){
-            primaryVizualizer = new HeightVizualizer(mapData.data.Select(el => el.fields.Find(x => x.id == primaryField.id)).Select(el => float.Parse(el.value)),maxHeight);
+            primaryVizualizer = new HeightVizualizer(
+                    mapData.data
+                        .SelectMany(el => el.values)
+                        .Select(el => el.fields.Find(x => x.id == primaryField.id))
+                        .Select(el => {
+                            try {
+                                return float.Parse(el.value,System.Globalization.NumberStyles.Any,System.Globalization.CultureInfo.InvariantCulture);
+                            } catch(Exception e) {
+                                Debug.LogError("Can't parse number '"+el.value+"' : "+e.Message);
+                                return 0;
+                            }
+                        }),
+                    maxHeight
+                );
         } else {
             Debug.LogError("Unsupported type '"+primaryField.type+"' on secondary field");
         }
 
         var secondaryField = DataLoader.secondaryField;
         if(secondaryField.type == "string"){
-            secondaryDiscreteVizualizer = new DiscreteColorVizualizer((mapData.data.Select(el => el.fields.Find(x => x.id == secondaryField.id).value)));
+
+            secondaryDiscreteVizualizer = new DiscreteColorVizualizer(
+                mapData.data
+                    .SelectMany(el => el.values)
+                    .Select(el => el.fields.Find(x => x.id == secondaryField.id).value));
+
         } else if(secondaryField.type == "number") {
-            rangeColorVizualizer = new RangeColorVizualizer((mapData.data.Select(el => float.Parse(el.fields.Find(x => x.id == secondaryField.id).value))), Color.green, Color.red );
+
+            rangeColorVizualizer = new RangeColorVizualizer((
+                mapData.data
+                    .SelectMany(el => el.values)
+                    .Select(el => {
+                            var strVal = el.fields.Find(x => x.id == secondaryField.id).value;
+                            try {
+                                return float.Parse(strVal,System.Globalization.NumberStyles.Any,System.Globalization.CultureInfo.InvariantCulture);
+                            } catch(Exception e) {
+                                Debug.LogError("Can't parse number '"+strVal+"' : "+e.Message);
+                                return 0;
+                            }
+                    })),
+                Color.green,
+                Color.red);
+        
         } else {
             Debug.LogError("Unsupported type '"+secondaryField.type+"' on secondary field");
         }
+
+        timeManager = new TimeManager(mapData.data.SelectMany(el => el.values).Select(el => el.timestamp));
+        date = timeManager.maxTime;
 
         var locOpt = map.Options.locationOptions;
         map.Initialize(Conversions.StringToLatLon(locOpt.latitudeLongitude),(int) locOpt.zoom);
@@ -120,27 +181,33 @@ public class DataHandler : MonoBehaviour
             var primaryField = DataLoader.primaryField;
             parameters.point = point;
             
+            TimeValue currentValue = point.values.Find(el => el.timestamp == date);
+
             if(primaryVizualizer != null){
-                FieldValue val = point.fields.Find(el => el.id == primaryField.id);
-                if(val != null){
-                    parameters.height = primaryVizualizer.getVizualization(float.Parse(val.value));
+                if(currentValue != null){
+                    FieldValue val = currentValue.fields.Find(el => el.id == primaryField.id);
+                    if(val != null){
+                        parameters.height = primaryVizualizer.getVizualization(float.Parse(val.value,CultureInfo.InvariantCulture));
+                    } else {
+                        parameters.height = 0;
+                    }
                 } else {
-                    parameters.height = 0;
+                        parameters.height = 0;
                 }
             } else {
                 parameters.height = 1;
             }
 
-            if(secondaryDiscreteVizualizer != null){
-                FieldValue val = point.fields.Find(el => el.id == secondaryField.id);
+            if(secondaryDiscreteVizualizer != null && currentValue != null){
+                FieldValue val = currentValue.fields.Find(el => el.id == secondaryField.id);
                 if(val != null){
                     parameters.color = secondaryDiscreteVizualizer.getVizualization(val.value);
                 }
             }
-            else if(rangeColorVizualizer != null) {
-                FieldValue val = point.fields.Find(el => el.id == secondaryField.id);
+            else if(rangeColorVizualizer != null && currentValue!= null) {
+                FieldValue val = currentValue.fields.Find(el => el.id == secondaryField.id);
                 if(val != null){
-                    parameters.color = rangeColorVizualizer.getVizualization(float.Parse(val.value));
+                    parameters.color = rangeColorVizualizer.getVizualization(float.Parse(val.value,CultureInfo.InvariantCulture));
                 }
             }
 
@@ -158,9 +225,10 @@ public class DataHandler : MonoBehaviour
         } else {
             datapoint.SetActive(false);
         }
+
         if(zoomMap != null && zoomMap.activeSelf){
             Bounds zoombb = zoomMap.GetComponent<DataHandler>().boundingBox;
-            zoombb.Expand(new Vector3(0.5f,10,0.5f));
+            zoombb.min = new Vector3(zoombb.min.x,transform.position.y-0.1f,zoombb.min.z);
             if(zoombb.Contains(pos)){
                 dataPointScript.muted = true;
             } else {
@@ -168,7 +236,40 @@ public class DataHandler : MonoBehaviour
             }
         } else {
                 dataPointScript.muted = false;
+        }
+
+        MapDataPoint parameters = datapoint.GetComponent<MapDataPoint>();
+        var secondaryField = DataLoader.secondaryField;
+        var primaryField = DataLoader.primaryField;
+        TimeValue currentValue = dataPointScript.point.values.Find(el => el.timestamp == date);
+
+        if(primaryVizualizer != null){
+            if(currentValue != null){
+                FieldValue val = currentValue.fields.Find(el => el.id == primaryField.id);
+                if(val != null){
+                    parameters.height = primaryVizualizer.getVizualization(float.Parse(val.value,CultureInfo.InvariantCulture));
+                } else {
+                    parameters.height = 0;
+                }
+            } else {
+                    parameters.height = 0;
             }
+        } else {
+            parameters.height = 1;
+        }
+
+        if(secondaryDiscreteVizualizer != null && currentValue != null){
+            FieldValue val = currentValue.fields.Find(el => el.id == secondaryField.id);
+            if(val != null){
+                parameters.color = secondaryDiscreteVizualizer.getVizualization(val.value);
+            }
+        }
+        else if(rangeColorVizualizer != null && currentValue!= null) {
+            FieldValue val = currentValue.fields.Find(el => el.id == secondaryField.id);
+            if(val != null){
+                parameters.color = rangeColorVizualizer.getVizualization(float.Parse(val.value,CultureInfo.InvariantCulture));
+            }
+        }
     }
 
     public void UpdateAllPoints(){
@@ -185,10 +286,29 @@ public class DataHandler : MonoBehaviour
         PointInfoPrefab.transform.position =  dataPoint.top;
         var mapData = DataLoader.data;
 
-        List<string[]> lstValue =  dataPoint.point.fields.Select( el => {
+        TimeValue currentValue = dataPoint.point.values.Find(el => el.timestamp == date);
+
+        if(currentValue == null)
+            return;
+        
+        PointInfoPrefab.transform.LookAt(Camera.main.transform.position);
+        float yAxe = PointInfoPrefab.transform.eulerAngles.y;
+        PointInfoPrefab.transform.eulerAngles = new Vector3(0, yAxe+180, 0);
+
+        shownInfo = dataPoint;
+
+        updateInfoPanel(dataPoint);
+
+    }
+
+    void updateInfoPanel(MapDataPoint dataPoint){
+        var mapData = DataLoader.data;
+        TimeValue currentValue = dataPoint.point.values.Find(el => el.timestamp == date);
+
+        List<string[]> lstValue =  currentValue.fields.Select( el => {
             var def = mapData.dataset.fields.Find( f => f.id == el.id);
             if(def != null) {
-                return new string[] {def.displayName,el.value};
+                return new string[] {def.displayname,el.value};
             } else {
                 return new string[] {el.id,el.value};
             }
@@ -197,11 +317,6 @@ public class DataHandler : MonoBehaviour
         foreach(Transform text in PanelTransform) {
             Destroy(text.gameObject); 
         }
-        
-        PointInfoPrefab.transform.LookAt(Camera.main.transform.position);
-        float yAxe = PointInfoPrefab.transform.eulerAngles.y;
-        PointInfoPrefab.transform.eulerAngles = new Vector3(0, yAxe+180, 0);
-
 
         lstValue.ForEach( txt => {
             GameObject textInfoDescription = Instantiate(PointInfoText, PanelTransform.position, PointInfoPrefab.transform.rotation, PanelTransform);
@@ -220,7 +335,6 @@ public class DataHandler : MonoBehaviour
         if(distanceToFloor < 0){
             PointInfoPrefab.transform.Translate(new Vector3(0,Math.Abs(distanceToFloor),0));
         }
-
     }
 
     public void UpdateUi(){
@@ -266,6 +380,7 @@ public class DataHandler : MonoBehaviour
 
     public void HideInfo() {
          PointInfoPrefab.SetActive(false);
+         shownInfo = null;
     }
 
     public void Zoom(Vector3 mapPos, float zoom = -1){
@@ -283,6 +398,7 @@ public class DataHandler : MonoBehaviour
 
         Vector2d center = map.WorldToGeoPosition(mapPos);
         handler.UpdateMap(center,zoom);
+        handler.displayedDate = date;
         UpdateAllPoints();
     }
 
@@ -297,10 +413,12 @@ public class DataHandler : MonoBehaviour
         }
         else {
             Tiequar.RootObject tiequar = JsonUtility.FromJson<Tiequar.RootObject>(request.downloadHandler.text);
-            string[] displayName = tiequar.display_name.Split(',');
-            SuburbText.text = displayName[0];
-            CityDistrictText.text = displayName[1];
-            tiequarCanvas.SetActive(true);
+            if(tiequar.display_name != null){
+                string[] displayName = tiequar.display_name.Split(',');
+                SuburbText.text = displayName[0];
+                CityDistrictText.text = displayName[1];
+                tiequarCanvas.SetActive(true);
+            }
         }
     }
 }

@@ -135,19 +135,25 @@ public class HandController : MonoBehaviour
             float grabbingDistance = Vector3.Dot(grabbingStartRotation * Vector3.left,(grabbingStartPosition - TopUI.transform.position).normalized) * (grabbingStartPosition - TopUI.transform.position).magnitude;
             
             grabbingDate = currentDate.AddMilliseconds(grabbingDistance*timeScale);
-            
-            UpdateDate(grabbingDate);
+
+            dataHandler.displayedDate = (new DateTimeOffset(grabbingDate)).ToUnixTimeMilliseconds();
+            UpdateDate(new DateTime(1970, 1, 1) + TimeSpan.FromMilliseconds(dataHandler.displayedDate));
 
         } else if(isGrabbing){
             currentDate = grabbingDate;
+            dataHandler.displayedDate = (new DateTimeOffset(currentDate)).ToUnixTimeMilliseconds();
+            UpdateDate(new DateTime(1970, 1, 1) + TimeSpan.FromMilliseconds(dataHandler.displayedDate));
             isGrabbing = false;
             TopUI.transform.localPosition = new Vector3(0,0,0);
             TopUI.transform.localRotation = new Quaternion(0,0,0,0);
+        } else {
+            currentDate = new DateTime(1970, 1, 1) + TimeSpan.FromMilliseconds(dataHandler.displayedDate);
+            UpdateDate(currentDate);
         }
     }
 
     private void UpdateDate(DateTime date){
         dateText.text = string.Format("{0:dd/MM/yyyy}",date);
-        timeText.text = string.Format("{0:hh}h {0:mm}min {0:ss}sec",date);
+        timeText.text = string.Format("{0:hh}:{0:mm}",date);
     }
 }

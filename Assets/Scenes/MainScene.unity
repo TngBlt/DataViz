@@ -240,7 +240,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1857562de48ba244e8e3f751ecaa1731, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  datasetFile: {fileID: 4900000, guid: 04ec43e36892c2a42a1f0af7925be90f, type: 3}
+  datasetFile: {fileID: 4900000, guid: a1a5309b6865e224f80cfbb0b166eab6, type: 3}
 --- !u!4 &455184601
 Transform:
   m_ObjectHideFlags: 0
@@ -764,6 +764,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: DataMap
       objectReference: {fileID: 0}
+    - target: {fileID: 8257351156436099824, guid: 033336a44b1bca14d868fa22546676f6,
+        type: 3}
+      propertyPath: DataLoader
+      value: 
+      objectReference: {fileID: 455184600}
+    - target: {fileID: 8257351156436099824, guid: 033336a44b1bca14d868fa22546676f6,
+        type: 3}
+      propertyPath: zoomMap
+      value: 
+      objectReference: {fileID: 922662781}
     - target: {fileID: 8253209585973824024, guid: 033336a44b1bca14d868fa22546676f6,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -819,16 +829,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8257351156436099824, guid: 033336a44b1bca14d868fa22546676f6,
-        type: 3}
-      propertyPath: DataLoader
-      value: 
-      objectReference: {fileID: 455184600}
-    - target: {fileID: 8257351156436099824, guid: 033336a44b1bca14d868fa22546676f6,
-        type: 3}
-      propertyPath: zoomMap
-      value: 
-      objectReference: {fileID: 922662781}
     - target: {fileID: 8290762880880233774, guid: 033336a44b1bca14d868fa22546676f6,
         type: 3}
       propertyPath: _options.locationOptions.zoom
