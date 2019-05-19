@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.XR;
 using Mapbox.Unity.Map.Interfaces;
 using Mapbox.Unity.Map;
+using UnityEngine.UI;
+using System;
 
 public class HandController : MonoBehaviour
 {
@@ -21,6 +23,21 @@ public class HandController : MonoBehaviour
     public GameObject selectionModel;
 
     private bool isTriggering = false;
+    private bool isGrabbing = false;
+    private Vector3 grabbingStartOffset;
+    private Vector3 grabbingStartPosition;
+    private Quaternion grabbingStartRotation;
+    public GameObject TopUI;
+
+    public Text dateText;
+    public Text timeText;
+
+    public DateTime currentDate = DateTime.Now;
+    public DateTime grabbingDate;
+
+    public Double timeScale;
+
+    public RectTransform GraduationImage;
 
     // Start is called before the first frame update
     void Start()
@@ -103,5 +120,34 @@ public class HandController : MonoBehaviour
         } else {
         	isTriggering = false;
         }
+
+        bool grabValue;
+        if(device.TryGetFeatureValue(CommonUsages.gripButton, out grabValue) && grabValue){
+            if(!isGrabbing){
+                isGrabbing = true;
+                grabbingStartPosition = TopUI.transform.position;
+                grabbingStartRotation = TopUI.transform.rotation;
+                grabbingStartOffset = grabbingStartPosition - (grabbingStartPosition + Vector3.Project(transform.position,grabbingStartRotation * Vector3.left));
+            }
+            TopUI.transform.position = grabbingStartPosition + Vector3.Project(transform.position,grabbingStartRotation * Vector3.left) + grabbingStartOffset;
+            TopUI.transform.rotation = grabbingStartRotation;
+
+            float grabbingDistance = Vector3.Dot(grabbingStartRotation * Vector3.left,(grabbingStartPosition - TopUI.transform.position).normalized) * (grabbingStartPosition - TopUI.transform.position).magnitude;
+            
+            grabbingDate = currentDate.AddMilliseconds(grabbingDistance*timeScale);
+            
+            UpdateDate(grabbingDate);
+
+        } else if(isGrabbing){
+            currentDate = grabbingDate;
+            isGrabbing = false;
+            TopUI.transform.localPosition = new Vector3(0,0,0);
+            TopUI.transform.localRotation = new Quaternion(0,0,0,0);
+        }
+    }
+
+    private void UpdateDate(DateTime date){
+        dateText.text = string.Format("{0:dd/MM/yyyy}",date);
+        timeText.text = string.Format("{0:hh}h {0:mm}min {0:ss}sec",date);
     }
 }
