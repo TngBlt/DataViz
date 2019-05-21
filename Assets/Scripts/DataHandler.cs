@@ -60,6 +60,10 @@ public class DataHandler : MonoBehaviour
 
     public GameObject GraduationTextPrefab;
 
+    public TimeManager TimeMng{
+        get {return timeManager;}
+    }
+
     public long displayedDate {
         get {return date; }
         set { 

@@ -6,6 +6,7 @@ using Mapbox.Unity.Map.Interfaces;
 using Mapbox.Unity.Map;
 using UnityEngine.UI;
 using System;
+using vizualizers;
 
 public class HandController : MonoBehaviour
 {
@@ -35,9 +36,9 @@ public class HandController : MonoBehaviour
     public DateTime currentDate = DateTime.Now;
     public DateTime grabbingDate;
 
-    public Double timeScale;
+    public float timeScale;
 
-    public RectTransform GraduationImage;
+    public RectTransform GraduationCanvas;
 
     // Start is called before the first frame update
     void Start()
@@ -129,6 +130,12 @@ public class HandController : MonoBehaviour
                 grabbingStartPosition = TopUI.transform.position;
                 grabbingStartRotation = TopUI.transform.rotation;
                 grabbingStartOffset = grabbingStartPosition - (grabbingStartPosition + Vector3.Project(transform.position,grabbingStartRotation * Vector3.left));
+
+                GraduationCanvas.gameObject.SetActive(true);
+                TimeManager timeMng = dataHandler.TimeMng;
+                float timespan = timeMng.maxTime - timeMng.minTime;
+                float width = (timespan/timeScale) / GraduationCanvas.localScale.x;
+                GraduationCanvas.sizeDelta = new Vector2(width,250);
             }
             TopUI.transform.position = grabbingStartPosition + Vector3.Project(transform.position,grabbingStartRotation * Vector3.left) + grabbingStartOffset;
             TopUI.transform.rotation = grabbingStartRotation;
@@ -147,6 +154,7 @@ public class HandController : MonoBehaviour
             isGrabbing = false;
             TopUI.transform.localPosition = new Vector3(0,0,0);
             TopUI.transform.localRotation = new Quaternion(0,0,0,0);
+            GraduationCanvas.gameObject.SetActive(false);
         } else {
             currentDate = new DateTime(1970, 1, 1) + TimeSpan.FromMilliseconds(dataHandler.displayedDate);
             UpdateDate(currentDate);
@@ -156,5 +164,10 @@ public class HandController : MonoBehaviour
     private void UpdateDate(DateTime date){
         dateText.text = string.Format("{0:dd/MM/yyyy}",date);
         timeText.text = string.Format("{0:hh}:{0:mm}",date);
+
+        TimeManager timeMng = dataHandler.TimeMng;
+        float unixdate = (new DateTimeOffset(grabbingDate)).ToUnixTimeMilliseconds();
+        float pos = (unixdate - timeMng.minTime) / timeScale;
+        GraduationCanvas.localPosition = new Vector3(pos*-1,0,0);
     }
 }

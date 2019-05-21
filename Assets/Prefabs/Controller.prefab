@@ -60,7 +60,7 @@ MonoBehaviour:
   dateText: {fileID: 5983996673314575143}
   timeText: {fileID: 4732198701167635810}
   timeScale: 86400000
-  GraduationImage: {fileID: 2089304656691694336}
+  GraduationCanvas: {fileID: 5713800767308073669}
 --- !u!120 &143958493912598065
 LineRenderer:
   m_ObjectHideFlags: 0
@@ -193,8 +193,8 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 450, y: 250}
-  m_Pivot: {x: 0.5, y: 0}
+  m_SizeDelta: {x: 1000, y: 250}
+  m_Pivot: {x: 0, y: 0}
 --- !u!223 &2775247370013495422
 Canvas:
   m_ObjectHideFlags: 0

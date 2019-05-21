@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace vizualizers {
 
-    class TimeManager {
+    public class TimeManager {
 
         private long _maxTime;
         private long _minTime;
