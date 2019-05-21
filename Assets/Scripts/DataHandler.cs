@@ -52,7 +52,13 @@ public class DataHandler : MonoBehaviour
     [SerializeField]
     private long date;
 
+    public bool WithLegend;
+
+    public GameObject HeightLegendCanvas;
+
     private MapDataPoint shownInfo = null;
+
+    public GameObject GraduationTextPrefab;
 
     public long displayedDate {
         get {return date; }
@@ -156,6 +162,8 @@ public class DataHandler : MonoBehaviour
 
         timeManager = new TimeManager(mapData.data.SelectMany(el => el.values).Select(el => el.timestamp));
         date = timeManager.maxTime;
+
+        UpdateLegend();
 
         var locOpt = map.Options.locationOptions;
         map.Initialize(Conversions.StringToLatLon(locOpt.latitudeLongitude),(int) locOpt.zoom);
@@ -295,9 +303,82 @@ public class DataHandler : MonoBehaviour
         float yAxe = PointInfoPrefab.transform.eulerAngles.y;
         PointInfoPrefab.transform.eulerAngles = new Vector3(0, yAxe+180, 0);
 
+        if(WithLegend){
+            HeightLegendCanvas.transform.position = dataPoint.bottom;
+            HeightLegendCanvas.transform.eulerAngles = new Vector3(0, yAxe+180, 90);
+            HeightLegendCanvas.SetActive(true);
+        }
+
         shownInfo = dataPoint;
 
         updateInfoPanel(dataPoint);
+
+    }
+
+
+    public void HideLegend(){
+            HeightLegendCanvas.SetActive(false);
+    }
+
+    void UpdateLegend(){
+        if(!WithLegend){
+            HeightLegendCanvas.SetActive(false);
+            return;
+        }
+
+        if(primaryVizualizer != null){
+
+            RectTransform canvasRect =  HeightLegendCanvas.GetComponent<RectTransform>();
+
+            float grandeur = GetOrdreGrandeur(primaryVizualizer.MaxDataValue - primaryVizualizer.MinDataValue);
+            float graduationScale = primaryVizualizer.getVizualization(grandeur)*0.001f;
+            float compensationScale =canvasRect.rect.width * canvasRect.localScale.x/graduationScale;
+            canvasRect.localScale = new Vector3(graduationScale,0.001f,0.001f);
+
+            float taille = (primaryVizualizer.MaxHeight - primaryVizualizer.MinHeight)/graduationScale;
+            canvasRect.sizeDelta = new Vector2(taille,500);
+
+            RectTransform gradTop = HeightLegendCanvas.transform.GetChild(0).GetComponent<RectTransform>();
+            RectTransform gradBottom = HeightLegendCanvas.transform.GetChild(1).GetComponent<RectTransform>();
+
+            Vector3 zeroPos = new Vector3(primaryVizualizer.getVizualization(0),0,0);
+            gradTop.localPosition = zeroPos;
+            gradBottom.localPosition = zeroPos;
+
+            gradTop.sizeDelta = new Vector2(taille,500);
+            gradBottom.sizeDelta = new Vector2(grandeur*1000,500);
+
+            HeightLegendCanvas.transform.GetChild(2).GetComponent<Text>().text = primaryVizualizer.MaxDataValue.ToString() ;
+            GameObject graduationContainer = HeightLegendCanvas.transform.GetChild(3).gameObject;
+
+            foreach(GameObject grad in graduationContainer.transform){
+                Destroy(grad);
+            }
+
+            graduationContainer.transform.localScale = new Vector3(compensationScale/1000,1,1);
+
+            for(int i = 0; i<primaryVizualizer.MaxDataValue/grandeur; i++){
+                float height = i * grandeur;
+                GameObject grad = Instantiate(GraduationTextPrefab, graduationContainer.transform.position, graduationContainer.transform.rotation, graduationContainer.transform);
+                grad.transform.Rotate(0,0,-90);
+                grad.transform.localPosition = new Vector3(primaryVizualizer.getVizualization(height)*1000+i*10,1,1);
+                grad.GetComponent<Text>().text = height.ToString();
+            }
+
+        } else {
+            HeightLegendCanvas.SetActive(true);
+        }
+    }
+
+    float GetOrdreGrandeur(float val){
+        string strVal = val.ToString();
+        string[] parts = strVal.Split(',');
+
+        if(parts.Length == 1 || parts[0].Length > 1 || parts[0] != "0" ){
+            return parts[0] == "0" ? 0 : (float) Math.Pow(10,parts[0].Length - 1);
+        } else {
+            return parts[1] == "0" ? 0 : (float) Math.Pow(10,(parts[1].Length - 1) * -1);
+        }
 
     }
 
@@ -399,12 +480,15 @@ public class DataHandler : MonoBehaviour
         Vector2d center = map.WorldToGeoPosition(mapPos);
         handler.UpdateMap(center,zoom);
         handler.displayedDate = date;
+        HeightLegendCanvas.SetActive(false);
         UpdateAllPoints();
     }
 
     private IEnumerator GetTiequarName(Vector2d LatLng) {
         tiequarCanvas.SetActive(false);
-        UnityWebRequest request = UnityWebRequest.Get("https://nominatim.openstreetmap.org/reverse?lat="+LatLng.x.ToString().Replace(',','.')+"&lon="+LatLng.y.ToString().Replace(',','.')+"&format=json&zoom=14");
+        var zoom = parentMap.GetComponentInChildren<AbstractMap>().Options.locationOptions.zoom;
+        Debug.Log("https://nominatim.openstreetmap.org/reverse?lat="+LatLng.x.ToString().Replace(',','.')+"&lon="+LatLng.y.ToString().Replace(',','.')+"&format=json&zoom="+zoom);
+        UnityWebRequest request = UnityWebRequest.Get("https://nominatim.openstreetmap.org/reverse?lat="+LatLng.x.ToString().Replace(',','.')+"&lon="+LatLng.y.ToString().Replace(',','.')+"&format=json&zoom="+zoom);
         request.SetRequestHeader("User-Agent","DataViz CESI Lyon A4");
         yield return request.SendWebRequest();
 

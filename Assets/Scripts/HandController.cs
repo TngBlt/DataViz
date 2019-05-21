@@ -114,6 +114,7 @@ public class HandController : MonoBehaviour
 
             if(hasHit && hit.collider.gameObject.tag == "ui-close"){
                 hit.collider.GetComponentInParent<DataHandler>().Hide();
+                dataHandler.HideLegend();
             }
 
             isTriggering = true;
