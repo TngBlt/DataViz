@@ -466,6 +466,7 @@ public class DataHandler : MonoBehaviour
     public void HideInfo() {
          PointInfoPrefab.SetActive(false);
          shownInfo = null;
+         HideLegend();
     }
 
     public void Zoom(Vector3 mapPos, float zoom = -1){
