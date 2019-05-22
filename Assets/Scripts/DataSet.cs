@@ -20,6 +20,8 @@ namespace DataSet {
 
         public string primaryField;
         public string secondaryField;
+        public float zoom;
+        public List<double> center;
     }
 
     [System.Serializable]

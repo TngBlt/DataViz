@@ -7,6 +7,7 @@ using Mapbox.Unity.Map;
 using UnityEngine.UI;
 using System;
 using vizualizers;
+using System.Globalization;
 
 public class HandController : MonoBehaviour
 {
@@ -40,6 +41,8 @@ public class HandController : MonoBehaviour
 
     public RectTransform GraduationCanvas;
 
+    private HapticCapabilities capabilities;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -47,8 +50,11 @@ public class HandController : MonoBehaviour
         dataHandler = map.GetComponent<DataHandler>();
         lineRenderer = gameObject.GetComponent<LineRenderer>();
         //get device
-        device = InputDevices.GetDeviceAtXRNode(handNode);
+        device =  InputDevices.GetDeviceAtXRNode(handNode);
         selectionModel.SetActive(false);
+
+        // Load discret or range color legend
+        
     }
 
     // Update is called once per frame
@@ -162,12 +168,15 @@ public class HandController : MonoBehaviour
     }
 
     private void UpdateDate(DateTime date){
-        dateText.text = string.Format("{0:dd/MM/yyyy}",date);
-        timeText.text = string.Format("{0:hh}:{0:mm}",date);
+        date = date.AddHours(2.0);
+        dateText.text = date.ToString("dd/MM/yyyy");
+        timeText.text = date.ToString("HH:mm");
 
         TimeManager timeMng = dataHandler.TimeMng;
         float unixdate = (new DateTimeOffset(grabbingDate)).ToUnixTimeMilliseconds();
         float pos = (unixdate - timeMng.minTime) / timeScale;
         GraduationCanvas.localPosition = new Vector3(pos*-1,0,0);
+       
     }
+
 }

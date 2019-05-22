@@ -7,7 +7,7 @@ namespace vizualizers {
 
     class DiscreteColorVizualizer : IVizualizer<string,Color> {
 
-        private Dictionary<string,Color> colors = new Dictionary<string,Color>();
+        public Dictionary<string,Color> colors = new Dictionary<string,Color>();
 
         public DiscreteColorVizualizer(IEnumerable<string> data, float saturation = 0.88f, float brightness = 0.85f){
             List<string> values = new List<string>();

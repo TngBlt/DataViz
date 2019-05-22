@@ -13,6 +13,7 @@ using Mapbox.Utils;
 using vizualizers;
 using UnityEngine.Networking;
 using System.Globalization;
+using DataViz_A4.Assets.Scripts.vizualizers;
 
 public class DataHandler : MonoBehaviour
 {
@@ -59,6 +60,12 @@ public class DataHandler : MonoBehaviour
     private MapDataPoint shownInfo = null;
 
     public GameObject GraduationTextPrefab;
+
+    public Transform LegendPanelTransform;
+
+    public GameObject ColorLegendCircle;
+    
+    private int nbRangeLegend = 6;
 
     public TimeManager TimeMng{
         get {return timeManager;}
@@ -136,41 +143,53 @@ public class DataHandler : MonoBehaviour
         }
 
         var secondaryField = DataLoader.secondaryField;
-        if(secondaryField.type == "string"){
+        if(secondaryField != null) {
+            if(secondaryField.type == "string"){
 
-            secondaryDiscreteVizualizer = new DiscreteColorVizualizer(
-                mapData.data
-                    .SelectMany(el => el.values)
-                    .Select(el => el.fields.Find(x => x.id == secondaryField.id).value));
+                secondaryDiscreteVizualizer = new DiscreteColorVizualizer(
+                    mapData.data
+                        .SelectMany(el => el.values)
+                        .Select(el => el.fields.Find(x => x.id == secondaryField.id).value));
 
-        } else if(secondaryField.type == "number") {
+            } else if(secondaryField.type == "number") {
 
-            rangeColorVizualizer = new RangeColorVizualizer((
-                mapData.data
-                    .SelectMany(el => el.values)
-                    .Select(el => {
-                            var strVal = el.fields.Find(x => x.id == secondaryField.id).value;
-                            try {
-                                return float.Parse(strVal,System.Globalization.NumberStyles.Any,System.Globalization.CultureInfo.InvariantCulture);
-                            } catch(Exception e) {
-                                Debug.LogError("Can't parse number '"+strVal+"' : "+e.Message);
-                                return 0;
-                            }
-                    })),
-                Color.green,
-                Color.red);
-        
-        } else {
-            Debug.LogError("Unsupported type '"+secondaryField.type+"' on secondary field");
+                rangeColorVizualizer = new RangeColorVizualizer((
+                    mapData.data
+                        .SelectMany(el => el.values)
+                        .Select(el => {
+                                var strVal = el.fields.Find(x => x.id == secondaryField.id).value;
+                                try {
+                                    return float.Parse(strVal,System.Globalization.NumberStyles.Any,System.Globalization.CultureInfo.InvariantCulture);
+                                } catch(Exception e) {
+                                    Debug.LogError("Can't parse number '"+strVal+"' : "+e.Message);
+                                    return 0;
+                                }
+                        })),
+                    Color.green,
+                    Color.red);
+            
+            } else {
+                Debug.LogError("Unsupported type '"+secondaryField.type+"' on secondary field");
+            }
         }
+       
 
         timeManager = new TimeManager(mapData.data.SelectMany(el => el.values).Select(el => el.timestamp));
         date = timeManager.maxTime;
 
         UpdateLegend();
-
-        var locOpt = map.Options.locationOptions;
-        map.Initialize(Conversions.StringToLatLon(locOpt.latitudeLongitude),(int) locOpt.zoom);
+        if(secondaryDiscreteVizualizer != null )
+            UpdateDiscreteColorLegend();
+        else if (primaryVizualizer != null && DataLoader.secondaryField != null) {
+            UpdateRangeColorLegend();
+        }
+        if(DataLoader.center != null && DataLoader.zoom != null) {
+            map.Initialize(new Vector2d(DataLoader.center[0], DataLoader.center[1]), (int) DataLoader.zoom);        
+        } else {
+            var locOpt = map.Options.locationOptions;
+            map.Initialize(Conversions.StringToLatLon(locOpt.latitudeLongitude),(int) locOpt.zoom);    
+        }
+        
     }
 
     private void LoadDataset() {
@@ -371,6 +390,49 @@ public class DataHandler : MonoBehaviour
 
         } else {
             HeightLegendCanvas.SetActive(true);
+        }
+    }
+
+    void UpdateDiscreteColorLegend() {
+        if(zoomMap != null) {
+            foreach(KeyValuePair<string, Color> discrete in secondaryDiscreteVizualizer.colors)
+            {
+                GameObject circle = Instantiate(ColorLegendCircle, LegendPanelTransform.position, LegendPanelTransform.transform.rotation, LegendPanelTransform);
+                circle.GetComponent<Image>().color = discrete.Value;
+                circle.transform.localScale *=1.5f;
+                GameObject textCirclePrefab = Instantiate(PointInfoText, LegendPanelTransform.position, LegendPanelTransform.transform.rotation, LegendPanelTransform);
+                Text textCircle = textCirclePrefab.GetComponent<Text>();
+                textCircle.fontSize = 30;
+                textCircle.text = discrete.Key;
+            }
+        }
+    }
+
+    void UpdateRangeColorLegend() {
+        if(zoomMap != null) {
+            List<RangeColorLegend> rangeColors = new List<RangeColorLegend>();
+            var pas = rangeColorVizualizer.maxValue/nbRangeLegend;
+            for(int i =0; i < nbRangeLegend; i++) {
+                var scdValue = rangeColorVizualizer.minValue+(pas*(i+1));
+                rangeColors.Add(new RangeColorLegend(
+                    rangeColorVizualizer.getVizualization(rangeColorVizualizer.minValue),
+                    rangeColorVizualizer.getVizualization(scdValue),
+                    rangeColorVizualizer.minValue*i,
+                    scdValue));
+            }
+            rangeColors.ForEach( el => {
+                GameObject frstCircle = Instantiate(ColorLegendCircle, LegendPanelTransform.position, LegendPanelTransform.transform.rotation, LegendPanelTransform);
+                GameObject scndCircle = Instantiate(ColorLegendCircle, LegendPanelTransform.position, LegendPanelTransform.transform.rotation, LegendPanelTransform);
+                frstCircle.GetComponent<Image>().color = el.firstColor;
+                scndCircle.GetComponent<Image>().color = el.secondColor;
+                frstCircle.transform.localScale *=1.5f;
+                scndCircle.transform.localScale *=1.5f;
+                
+                GameObject textCirclePrefab = Instantiate(PointInfoText, LegendPanelTransform.position, LegendPanelTransform.transform.rotation, LegendPanelTransform);
+                Text textCircle = textCirclePrefab.GetComponent<Text>();
+                textCircle.fontSize = 30;
+                textCircle.text = el.firstValue + " - " + el.secondValue;
+            });
         }
     }
 

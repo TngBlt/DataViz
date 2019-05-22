@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using DataSet;
@@ -14,6 +15,8 @@ public class DataLoader : MonoBehaviour
 	private DataSet.DataSet mapData;
     private FieldDeclaration _primaryField;
     private FieldDeclaration _secondaryField;
+    private float _zoom;
+    private List<Double> _center;
 
     public DataLoadedDelegate onLoaded;
 
@@ -41,6 +44,17 @@ public class DataLoader : MonoBehaviour
     	}
     }
 
+    public float zoom {
+    	get {
+    		return _zoom;
+    	}
+    }
+        public List<Double> center {
+    	get {
+    		return _center;
+    	}
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -59,5 +73,7 @@ public class DataLoader : MonoBehaviour
         mapData = JsonUtility.FromJson<DataSet.DataSet>(textAsset.text);
         _primaryField = mapData.dataset.fields.Find(el => el.id == mapData.dataset.primaryField);
         _secondaryField = mapData.dataset.fields.Find(el => el.id == mapData.dataset.secondaryField);
+        _zoom = mapData.dataset.zoom;
+        _center = mapData.dataset.center;
     }
 }

@@ -7,10 +7,10 @@ namespace vizualizers {
 
     class RangeColorVizualizer : IVizualizer<float,Color> {
 
-        private Color startColor;
-        private Color endColor;
-        private float minValue;
-        private float maxValue;
+        public Color startColor;
+        public Color endColor;
+        public float minValue;
+        public float maxValue;
 
         public RangeColorVizualizer(IEnumerable<float> data, Color startColor, Color endColor){
             this.endColor = endColor;

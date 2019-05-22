@@ -28,8 +28,8 @@ namespace vizualizers {
         public HeightVizualizer(IEnumerable<float> data, float maxHeight, float minHeight = 0){
             this.maxHeight = maxHeight;
             this.minHeight = minHeight;
-            maxDataValue = (float) Math.Ceiling(data.Max() + 1);
-            minDataValue = (float) Math.Ceiling(data.Min() - 1);
+            maxDataValue = (float) Math.Ceiling(data.Max() );
+            minDataValue = (float) Math.Floor(data.Min() );
         }
 
         public float getVizualization(float input){
