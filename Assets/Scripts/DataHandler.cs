@@ -67,6 +67,8 @@ public class DataHandler : MonoBehaviour
     
     private int nbRangeLegend = 6;
 
+    public Text SecondaryFieldText;
+
     public TimeManager TimeMng{
         get {return timeManager;}
     }
@@ -178,6 +180,14 @@ public class DataHandler : MonoBehaviour
         date = timeManager.maxTime;
 
         UpdateLegend();
+
+        if(secondaryDiscreteVizualizer != null || DataLoader.secondaryField != null){
+            if(SecondaryFieldText != null)
+                SecondaryFieldText.text = secondaryField.displayname;
+        } else {
+            LegendPanelTransform.gameObject.SetActive(false);
+        }
+
         if(secondaryDiscreteVizualizer != null )
             UpdateDiscreteColorLegend();
         else if (primaryVizualizer != null && DataLoader.secondaryField != null) {
@@ -455,27 +465,28 @@ public class DataHandler : MonoBehaviour
     void UpdateRangeColorLegend() {
         if(zoomMap != null) {
             List<RangeColorLegend> rangeColors = new List<RangeColorLegend>();
-            var pas = rangeColorVizualizer.maxValue/nbRangeLegend;
+            var pas = (rangeColorVizualizer.maxValue - rangeColorVizualizer.minValue)/nbRangeLegend;
             for(int i =0; i < nbRangeLegend; i++) {
-                var scdValue = rangeColorVizualizer.minValue+(pas*(i+1));
+                var first = rangeColorVizualizer.minValue+(pas*(i));
+                var sec = rangeColorVizualizer.minValue+(pas*(i+1));
                 rangeColors.Add(new RangeColorLegend(
-                    rangeColorVizualizer.getVizualization(rangeColorVizualizer.minValue),
-                    rangeColorVizualizer.getVizualization(scdValue),
-                    rangeColorVizualizer.minValue*i,
-                    scdValue));
+                    rangeColorVizualizer.getVizualization(first),
+                    rangeColorVizualizer.getVizualization(sec),
+                    first,
+                    sec));
             }
             rangeColors.ForEach( el => {
                 GameObject frstCircle = Instantiate(ColorLegendCircle, LegendPanelTransform.position, LegendPanelTransform.transform.rotation, LegendPanelTransform);
-                GameObject scndCircle = Instantiate(ColorLegendCircle, LegendPanelTransform.position, LegendPanelTransform.transform.rotation, LegendPanelTransform);
+                //GameObject scndCircle = Instantiate(ColorLegendCircle, LegendPanelTransform.position, LegendPanelTransform.transform.rotation, LegendPanelTransform);
                 frstCircle.GetComponent<Image>().color = el.firstColor;
-                scndCircle.GetComponent<Image>().color = el.secondColor;
+                //scndCircle.GetComponent<Image>().color = el.secondColor;
                 frstCircle.transform.localScale *=1.5f;
-                scndCircle.transform.localScale *=1.5f;
+                //scndCircle.transform.localScale *=1.5f;
                 
                 GameObject textCirclePrefab = Instantiate(PointInfoText, LegendPanelTransform.position, LegendPanelTransform.transform.rotation, LegendPanelTransform);
                 Text textCircle = textCirclePrefab.GetComponent<Text>();
                 textCircle.fontSize = 30;
-                textCircle.text = el.firstValue + " - " + el.secondValue;
+                textCircle.text = Math.Round(el.firstValue) + " - " + Math.Round(el.secondValue);
             });
         }
     }

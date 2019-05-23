@@ -148,7 +148,7 @@ public class HandController : MonoBehaviour
 
             float grabbingDistance = Vector3.Dot(grabbingStartRotation * Vector3.left,(grabbingStartPosition - TopUI.transform.position).normalized) * (grabbingStartPosition - TopUI.transform.position).magnitude;
             
-            grabbingDate = currentDate.AddMilliseconds(grabbingDistance*timeScale);
+            grabbingDate = currentDate.AddHours(2).AddMilliseconds(grabbingDistance*timeScale);
 
             dataHandler.displayedDate = (new DateTimeOffset(grabbingDate)).ToUnixTimeMilliseconds();
             UpdateDate(new DateTime(1970, 1, 1) + TimeSpan.FromMilliseconds(dataHandler.displayedDate));
@@ -173,7 +173,7 @@ public class HandController : MonoBehaviour
         timeText.text = date.ToString("HH:mm");
 
         TimeManager timeMng = dataHandler.TimeMng;
-        float unixdate = (new DateTimeOffset(grabbingDate)).ToUnixTimeMilliseconds();
+        float unixdate = (new DateTimeOffset(date)).ToUnixTimeMilliseconds();
         float pos = (unixdate - timeMng.minTime) / timeScale;
         GraduationCanvas.localPosition = new Vector3(pos*-1,0,0);
        
