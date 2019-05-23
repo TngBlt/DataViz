@@ -1031,6 +1031,11 @@ PrefabInstance:
       propertyPath: LegendPanelTransform
       value: 
       objectReference: {fileID: 143958494170665459}
+    - target: {fileID: 8257351156436099824, guid: 033336a44b1bca14d868fa22546676f6,
+        type: 3}
+      propertyPath: maxHeight
+      value: 1.5
+      objectReference: {fileID: 0}
     - target: {fileID: 2874163063655414608, guid: 033336a44b1bca14d868fa22546676f6,
         type: 3}
       propertyPath: m_Name
