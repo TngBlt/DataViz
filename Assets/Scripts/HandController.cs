@@ -43,6 +43,8 @@ public class HandController : MonoBehaviour
 
     private HapticCapabilities capabilities;
 
+    public float minGrab;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -150,12 +152,17 @@ public class HandController : MonoBehaviour
             
             grabbingDate = currentDate.AddHours(2).AddMilliseconds(grabbingDistance*timeScale);
 
-            dataHandler.displayedDate = (new DateTimeOffset(grabbingDate)).ToUnixTimeMilliseconds();
+            if(grabbingDistance < minGrab){
+                return;
+            }
+
+            dataHandler.SetDisplayedDate((new DateTimeOffset(grabbingDate)).ToUnixTimeMilliseconds());
+
             UpdateDate(new DateTime(1970, 1, 1) + TimeSpan.FromMilliseconds(dataHandler.displayedDate));
 
         } else if(isGrabbing){
             currentDate = grabbingDate;
-            dataHandler.displayedDate = (new DateTimeOffset(currentDate)).ToUnixTimeMilliseconds();
+            dataHandler.SetDisplayedDate((new DateTimeOffset(currentDate)).ToUnixTimeMilliseconds());
             UpdateDate(new DateTime(1970, 1, 1) + TimeSpan.FromMilliseconds(dataHandler.displayedDate));
             isGrabbing = false;
             TopUI.transform.localPosition = new Vector3(0,0,0);
@@ -167,13 +174,14 @@ public class HandController : MonoBehaviour
         }
     }
 
-    private void UpdateDate(DateTime date){
-        date = date.AddHours(2.0);
-        dateText.text = date.ToString("dd/MM/yyyy");
-        timeText.text = date.ToString("HH:mm");
+    private void UpdateDate(DateTime dt){
+        dt = dt.AddHours(2.0);
+        dateText.text = dt.ToString("dd/MM/yyyy");
+        timeText.text = dt.ToString("HH:mm");
 
         TimeManager timeMng = dataHandler.TimeMng;
-        float unixdate = (new DateTimeOffset(date)).ToUnixTimeMilliseconds();
+
+        float unixdate = (new DateTimeOffset(dt)).ToUnixTimeMilliseconds();
         float pos = (unixdate - timeMng.minTime) / timeScale;
         GraduationCanvas.localPosition = new Vector3(pos*-1,0,0);
        

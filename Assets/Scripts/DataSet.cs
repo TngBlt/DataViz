@@ -1,5 +1,7 @@
 using System.Collections;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace DataSet {
@@ -43,6 +45,24 @@ namespace DataSet {
     {
         public List<double> point;
         public List<TimeValue> values;
+
+        private TimeIndexer _indexer;
+
+        public TimeIndexer indexer {
+            get { return _indexer; }
+        }
+
+        public TimeIndexer InitializeIndexer(){
+            IEnumerable<long> vals = values.Select(el => el.timestamp);
+
+            _indexer = new TimeIndexer(vals.Min(), vals.Max() - vals.Min());
+
+            foreach(TimeValue val in values){
+                _indexer.Add(val);
+            }
+
+            return _indexer;
+        }
     }
 
     [System.Serializable]

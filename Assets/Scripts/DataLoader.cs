@@ -75,5 +75,9 @@ public class DataLoader : MonoBehaviour
         _secondaryField = mapData.dataset.fields.Find(el => el.id == mapData.dataset.secondaryField);
         _zoom = mapData.dataset.zoom;
         _center = mapData.dataset.center;
+        
+        foreach(DataPoint point in mapData.data){
+            point.InitializeIndexer();
+        }
     }
 }

@@ -73,22 +73,25 @@ public class DataHandler : MonoBehaviour
         get {return timeManager;}
     }
 
-    public long displayedDate {
-        get {return date; }
-        set { 
+    public long displayedDate{
+        get { return date; }
+    }
+
+    public bool SetDisplayedDate(long value){
             long newDate = timeManager.GetNearest(value);
             if(newDate != date){
                 date = newDate;
                 if(zoomMap != null){
-                    zoomMap.GetComponent<DataHandler>().displayedDate = date;
+                    zoomMap.GetComponent<DataHandler>().SetDisplayedDate(date);
                 }
                 UpdateAllPointsTime();
                 if(shownInfo != null){
                     updateInfoPanel(shownInfo);
                 }
+                return true;
             }
+            return false;
         }
-    }
 
     public Bounds boundingBox {
         get {
@@ -255,13 +258,20 @@ public class DataHandler : MonoBehaviour
             parameters.scale = pointsScale;
     }
 
-    private void UpdatePoint(GameObject datapoint){
+    private void UpdatePoint(GameObject datapoint, bool skipPosition = false){
+
         MapDataPoint dataPointScript = datapoint.GetComponent<MapDataPoint>();
-        Vector2d latLng = new Vector2d(dataPointScript.point.point[1], dataPointScript.point.point[0]);
-        Vector3 pos = map.GeoToWorldPosition(latLng, false);
-        datapoint.transform.position = pos;
-        dataPointScript.ResetPosition();
-        if(boundingBox.Contains(pos)){
+        
+        if(!skipPosition){
+            Vector2d latLng = new Vector2d(dataPointScript.point.point[1], dataPointScript.point.point[0]);
+            Vector3 pos = map.GeoToWorldPosition(latLng, false);
+            datapoint.transform.position = pos;
+            dataPointScript.ResetPosition();
+        }
+
+        Vector3 position = datapoint.transform.position;
+
+        if(boundingBox.Contains(position)){
             datapoint.SetActive(true);
         } else {
             datapoint.SetActive(false);
@@ -270,7 +280,7 @@ public class DataHandler : MonoBehaviour
         if(zoomMap != null && zoomMap.activeSelf){
             Bounds zoombb = zoomMap.GetComponent<DataHandler>().boundingBox;
             zoombb.min = new Vector3(zoombb.min.x,transform.position.y-0.1f,zoombb.min.z);
-            if(zoombb.Contains(pos)){
+            if(zoombb.Contains(position)){
                 dataPointScript.muted = true;
             } else {
                 dataPointScript.muted = false;
@@ -282,7 +292,7 @@ public class DataHandler : MonoBehaviour
         MapDataPoint parameters = datapoint.GetComponent<MapDataPoint>();
         var secondaryField = DataLoader.secondaryField;
         var primaryField = DataLoader.primaryField;
-        TimeValue currentValue = dataPointScript.point.values.Find(el => el.timestamp == date);
+        TimeValue currentValue = dataPointScript.point.indexer.Get(date);
 
         if(primaryVizualizer != null){
             if(currentValue != null){
@@ -371,7 +381,7 @@ public class DataHandler : MonoBehaviour
         PointInfoPrefab.transform.position =  dataPoint.top;
         var mapData = DataLoader.data;
 
-        TimeValue currentValue = dataPoint.point.values.Find(el => el.timestamp == date);
+        TimeValue currentValue = dataPoint.point.indexer.Get(date);
 
         if(currentValue == null)
             return;
@@ -505,7 +515,7 @@ public class DataHandler : MonoBehaviour
 
     void updateInfoPanel(MapDataPoint dataPoint){
         var mapData = DataLoader.data;
-        TimeValue currentValue = dataPoint.point.values.Find(el => el.timestamp == date);
+        TimeValue currentValue = dataPoint.point.indexer.Get(date);
 
         List<string[]> lstValue =  currentValue.fields.Select( el => {
             var def = mapData.dataset.fields.Find( f => f.id == el.id);
@@ -601,7 +611,7 @@ public class DataHandler : MonoBehaviour
 
         Vector2d center = map.WorldToGeoPosition(mapPos);
         handler.UpdateMap(center,zoom);
-        handler.displayedDate = date;
+        handler.SetDisplayedDate(date);
         HeightLegendCanvas.SetActive(false);
         UpdateAllPoints();
     }
