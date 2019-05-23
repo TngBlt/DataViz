@@ -183,7 +183,7 @@ public class DataHandler : MonoBehaviour
         else if (primaryVizualizer != null && DataLoader.secondaryField != null) {
             UpdateRangeColorLegend();
         }
-        if(DataLoader.center != null && DataLoader.zoom != null) {
+        if(DataLoader.center.Count == 2 && DataLoader.zoom != 0) {
             map.Initialize(new Vector2d(DataLoader.center[0], DataLoader.center[1]), (int) DataLoader.zoom);        
         } else {
             var locOpt = map.Options.locationOptions;
