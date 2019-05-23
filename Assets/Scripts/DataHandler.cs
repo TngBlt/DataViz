@@ -80,7 +80,7 @@ public class DataHandler : MonoBehaviour
                 if(zoomMap != null){
                     zoomMap.GetComponent<DataHandler>().displayedDate = date;
                 }
-                UpdateAllPoints();
+                UpdateAllPointsTime();
                 if(shownInfo != null){
                     updateInfoPanel(shownInfo);
                 }
@@ -303,10 +303,54 @@ public class DataHandler : MonoBehaviour
         }
     }
 
+    void UpdatePointTime(GameObject datapoint){
+        MapDataPoint dataPointScript = datapoint.GetComponent<MapDataPoint>();
+        MapDataPoint parameters = datapoint.GetComponent<MapDataPoint>();
+        var secondaryField = DataLoader.secondaryField;
+        var primaryField = DataLoader.primaryField;
+        TimeValue currentValue = dataPointScript.point.values.Find(el => el.timestamp == date);
+
+        if(primaryVizualizer != null){
+            if(currentValue != null){
+                FieldValue val = currentValue.fields.Find(el => el.id == primaryField.id);
+                if(val != null){
+                    parameters.height = primaryVizualizer.getVizualization(float.Parse(val.value,CultureInfo.InvariantCulture));
+                } else {
+                    parameters.height = 0;
+                }
+            } else {
+                    parameters.height = 0;
+            }
+        } else {
+            parameters.height = 1;
+        }
+
+        if(secondaryDiscreteVizualizer != null && currentValue != null){
+            FieldValue val = currentValue.fields.Find(el => el.id == secondaryField.id);
+            if(val != null){
+                parameters.color = secondaryDiscreteVizualizer.getVizualization(val.value);
+            }
+        }
+        else if(rangeColorVizualizer != null && currentValue!= null) {
+            FieldValue val = currentValue.fields.Find(el => el.id == secondaryField.id);
+            if(val != null){
+                parameters.color = rangeColorVizualizer.getVizualization(float.Parse(val.value,CultureInfo.InvariantCulture));
+            }
+        }
+    }
+
     public void UpdateAllPoints(){
         foreach (Transform child in pointsGroup.transform) {
             if(child.GetComponent<MapDataPoint>() != null){
                 UpdatePoint(child.gameObject);
+            }
+        }
+    }
+
+    public void UpdateAllPointsTime(){
+        foreach (Transform child in pointsGroup.transform) {
+            if(child.GetComponent<MapDataPoint>() != null){
+                UpdatePointTime(child.gameObject);
             }
         }
     }
